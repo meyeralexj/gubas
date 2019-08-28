@@ -8,8 +8,8 @@ The goal of the general use binary asteroid simulator is to provide a simple to 
 
 I ask that you provide the link to this repository and cite the following paper (where it is referenced in Appendix D) if you use the tool in publications:
 
-Alex B. Davis and Daniel J. Scheeres
-Doubly Synchronous Binary Asteroid Mass Parameter Observability
+Alex B. Davis and Daniel J. Scheeres,
+Doubly Synchronous Binary Asteroid Mass Parameter Observability,
 Icarus, In Review
 
 -Alex B. Davis
