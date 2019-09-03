@@ -13,3 +13,6 @@ Doubly Synchronous Binary Asteroid Mass Parameter Observability,
 Icarus, In Revisions
 
 -Alex B. Davis
+
+Errata:
+User Guide Eq. 9: The provided definition of the inertia integrals is mass normalized, the code and descriptions in the following equations do not use the mass normalized form
