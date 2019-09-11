@@ -10,7 +10,7 @@ I ask that you provide the link to this repository and cite the following paper 
 
 Alex B. Davis and Daniel J. Scheeres,
 Doubly Synchronous Binary Asteroid Mass Parameter Observability,
-Icarus, In Revisions
+Icarus, Accepted
 
 -Alex B. Davis
 
