@@ -10,7 +10,7 @@ from numpy import math as ma
 
 #generate tk expansion coefficients where m is mutual potential truncation order - output tk is matrix with rows of expansion order and columns of recursion steps
 def tk_calc(m):
-	t=np.zeros([m+1,m/2+2])# create t matrix
+	t=np.zeros([m+1,m//2+2])# create t matrix
 	for n in range(m+1):# loop through expansion orders up to truncation order
 		if np.mod(n,2.):# if odd
 			t[n,0]=(-1.)**((n-1.)/2.)*float(ma.factorial(n))/(2.**(n-1.)\

@@ -11,26 +11,26 @@ from numpy import math as ma
 import subprocess
 import os
 import datetime
-import ConfigParser as cfp
+import configparser as cfp
 import struct 
 import csv
 from decimal import Decimal
 
-print datetime.datetime.now()
+print(datetime.datetime.now())
 # np.set_printoptions(precision=20)
 np.set_printoptions(formatter={'float': lambda x: "{0:0.20f}".format(x)})
-execfile('inertia_functions_met.py')# inertia integral and tensor calculation and manipulation
-execfile('coefficient_funcs.py')# expansion coefficients
-execfile('potential+derivs_func.py')# mutual potential and partials functions
-execfile('write_icfile.py')# cpp input file writeout
-execfile('benchmark_funcs.py')# Fahnestock format readin
-execfile('hou_config_funcs.py')# Config file readin
+exec(open('./inertia_functions_met.py').read())# inertia integral and tensor calculation and manipulation
+exec(open('coefficient_funcs.py').read())# expansion coefficients
+exec(open('potential+derivs_func.py').read())# mutual potential and partials functions
+exec(open('write_icfile.py').read())# cpp input file writeout
+exec(open('benchmark_funcs.py').read())# Fahnestock format readin
+exec(open('hou_config_funcs.py').read())# Config file readin
 
 ## variables
 # read in config file
 (G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun)=hou_config_read("hou_config.cfg")
 n=max(nA,nB) # set mutual potential expansion order to max inertia integral expansion order
-print "\n### Expansion Order Set To: {val} ###\n".format(val=n)
+print("\n### Expansion Order Set To: {val} ###\n".format(val=n))
 
 ## compute expansion coefficients for post processing
 a=a_calc(n)
@@ -44,14 +44,14 @@ if out_freq>0 and (out_freq<h or mod_check!=0) and integ!=3:
 
 ## announce integrator selection
 if integ ==1:
-	print "### Integrator Set to RK4 from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h)
+	print("### Integrator Set to RK4 from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h))
 elif integ ==2:
-	print "### Integrator Set to LGVI from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h)
+	print("### Integrator Set to LGVI from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h))
 elif integ ==3:
-	print "### Integrtator Set to RK 7(8) from {t0} seconds to {tf} seconds with a tolerance of {tol} ###".format(t0=t0, tf=tf, tol=tol)
-	print "+++ This is an adaptive integrator and the output will be post-processed for each step of the integrator +++"
+	print("### Integrtator Set to RK 7(8) from {t0} seconds to {tf} seconds with a tolerance of {tol} ###".format(t0=t0, tf=tf, tol=tol))
+	print("+++ This is an adaptive integrator and the output will be post-processed for each step of the integrator +++")
 elif integ ==4:
-	print "### Integrtator Set to A-B-M from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h)
+	print("### Integrtator Set to A-B-M from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h))
 else:
 	raise ValueError('Invalid Integrator Selection')
 
@@ -60,32 +60,32 @@ else:
 # treat is accurate enough for arbitrary order
 if nA<n and a_shape==2:
 	nA=n
-	print "### Expansion Order of Primary Shape Increased to Match Integrated Order ###"
+	print("### Expansion Order of Primary Shape Increased to Match Integrated Order ###")
 
 if nB<n and b_shape==2:
 	nB=n
-	print "### Expansion Order of Secondary Shape Increased to Match Integrated Order ###"
+	print("### Expansion Order of Secondary Shape Increased to Match Integrated Order ###")
 
 ## announce body shape selections
 if a_shape==0:
 	bA=aA
 	cA=aA
-	print "\n### Primary is a Sphere with Radius: {val} meters ###\n".format(val=aA)
+	print("\n### Primary is a Sphere with Radius: {val} meters ###\n".format(val=aA))
 elif a_shape==1:
-	print "\n### Primary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nA,a=aA,b=bA,c=cA)
+	print("\n### Primary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nA,a=aA,b=bA,c=cA))
 elif a_shape==2:
-	print "\n### Primary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nA,fa=tet_fileA, fb=vert_fileA)
+	print("\n### Primary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nA,fa=tet_fileA, fb=vert_fileA))
 else:
 	raise ValueError('Bad Shape Selection for Primary')
 
 if b_shape==0:
 	bB=aB
 	cB=aB
-	print "\n### Secondary is a Sphere with Radius: {val} meters ###\n".format(val=aB)
+	print("\n### Secondary is a Sphere with Radius: {val} meters ###\n".format(val=aB))
 elif b_shape==1:
-	print "\n### Secondary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nB,a=aB,b=bB,c=cB)
+	print("\n### Secondary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nB,a=aB,b=bB,c=cB))
 elif b_shape==2:
-	print "\n### Secondary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nB,fa=tet_fileB, fb=vert_fileB)
+	print("\n### Secondary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nB,fa=tet_fileB, fb=vert_fileB))
 else:
 	raise ValueError('Bad Shape Selection for Secondary')
 
@@ -96,7 +96,7 @@ write_icfile(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,"TDP_"+
 ## call cpp exe
 subprocess.call(["./hou_cpp_final"])
 
-print datetime.datetime.now()
+print(datetime.datetime.now())
 
 ## convert cpp inertia integral format to python format - 3D matrices use difference index order so must fix this for python
 TAc=np.genfromtxt ("TDP_"+str(n)+".csv", delimiter=",")
@@ -182,8 +182,8 @@ if out_freq==-1 or integ==3: # if a output time file or rk 7(8) are used enter t
 				# eof
 				break
 			t=struct.unpack('d',t)
-                        if t in times:
-				times[times.index(t)]=count
+			if t in times:
+					times[times.index(t)]=count
 			elif integ==3:
 				times.append(count)
 			count=count+1
@@ -193,24 +193,24 @@ if out_freq==-1 or integ==3: # if a output time file or rk 7(8) are used enter t
 	# count2=0
 	dsize=len(times)
 	x_file=open('output_x/x_out.bin',"rb")
-        t_file=open('output_t/t_out.bin',"rb")
-        kt=np.zeros([1,1])
-        kr1=np.zeros([1,1])
-        kr2=np.zeros([1,1])
-        U=np.zeros([1,1])
-        E=np.zeros([1,1])
-        H=np.zeros([1,3])
-        rpos=np.zeros([1,3])
-        lvel=np.zeros([1,3])
-        lwc=np.zeros([1,3])
-        lws=np.zeros([1,3])
-        rmom=np.zeros([1,3])
-        cLa=np.zeros([1,3])
-        cLb=np.zeros([1,3])
-        C_store=np.zeros([1,9])
-        Cc_store=np.zeros([1,9])
-        fCc_store=np.zeros([1,9])
-        tsett=np.zeros([1,1])
+	t_file=open('output_t/t_out.bin',"rb")
+	kt=np.zeros([1,1])
+	kr1=np.zeros([1,1])
+	kr2=np.zeros([1,1])
+	U=np.zeros([1,1])
+	E=np.zeros([1,1])
+	H=np.zeros([1,3])
+	rpos=np.zeros([1,3])
+	lvel=np.zeros([1,3])
+	lwc=np.zeros([1,3])
+	lws=np.zeros([1,3])
+	rmom=np.zeros([1,3])
+	cLa=np.zeros([1,3])
+	cLb=np.zeros([1,3])
+	C_store=np.zeros([1,9])
+	Cc_store=np.zeros([1,9])
+	fCc_store=np.zeros([1,9])
+	tsett=np.zeros([1,1])
 	for f in range(count):# count is the number of time steps found in binary during "with open" loop above
 		if f in times:# loop through stored lists of output times
 			tseek=t_file.seek(f*8)#jump in bits for time binary
@@ -554,4 +554,4 @@ if helio_toggle==1:
 # t_file.close()
 # x_file.close()
 
-print datetime.datetime.now()
+print(datetime.datetime.now())

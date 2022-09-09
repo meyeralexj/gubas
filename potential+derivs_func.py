@@ -30,13 +30,13 @@ def u_tilde(n,t,a,b,e,TA,TBp):
 												for j5 in range(int(n-k+1-j1-j2-j3-j4)):
 													for j6 in [int(n-k-j1-j2-j3-j4-j5)]:
 														# do u tilde calculation inside summations	
-														u[k/2]+=a[k][i1][i2][i3][i4][i5][i6]\
+														u[k//2]+=a[k][i1][i2][i3][i4][i5][i6]\
 															*b[n-k][j1][j2][j3][j4][j5][j6]\
 															*e[0,0]**(i1+i4)*e[0,1]**(i2+i5)\
 															*e[0,2]**(i3+i6)\
 															*TA[i1+j1][i2+j2][i3+j3]\
 															*TBp[i4+j4][i5+j5][i6+j6]
-		u[k/2]=u[k/2]*t[k/2]#deal with summation over k
+		u[k//2]=u[k//2]*t[k//2]#deal with summation over k
 	u=sum(u)
 	return u
 
@@ -122,12 +122,12 @@ def du_dx_tilde(n,t,a,b,e,R,dx,TA,TBp):
 																		+(i2+i5)*e[0,0]**(i1+i4)*e[0,1]**(i2+i5-1.)\
 																		*e[0,2]**(i3+i6)*de_dx1
 
-														du[k/2]+=a[k][i1][i2][i3][i4][i5][i6]\
+														du[k//2]+=a[k][i1][i2][i3][i4][i5][i6]\
 															*b[n-k][j1][j2][j3][j4][j5][j6]\
 															*TA[i1+j1][i2+j2][i3+j3]\
 															*TBp[i4+j4][i5+j5][i6+j6]\
 															*ce
-		du[k/2]=du[k/2]*t[k/2]# handle tk part of summation in Hou paper
+		du[k//2]=du[k//2]*t[k//2]# handle tk part of summation in Hou paper
 	du=sum(du)												
 	return du
 
@@ -148,7 +148,7 @@ def dT_dc(ij,C,q,T):
 							for j2 in range(m-i2+1):
 								for i3 in range(n+1):
 									for j3 in range(n-i3+1):
-										if (i1+i2+i3<=q)and(j1+j2+j3<=q)and\
+										if (i1+i2+i3<=q) and (j1+j2+j3<=q)and\
 											(l+m+n-i1-i2-i3-j1-j2-j3<=q):# conditional check to ensure constraints are enforced
 											c=0. 
 											if ij[0]==0:# c is the coefficients in the Hou equation, because some can go to 0 in partial must use conditionals to set up coefficients

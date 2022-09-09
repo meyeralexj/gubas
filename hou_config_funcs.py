@@ -67,7 +67,7 @@ def hou_config_read(filename):
     refrad2 = CFG.getfloat("Additional Forces and Perturbations","Secondary Reference Radius")
     eps1 = CFG.getfloat("Additional Forces and Perturbations","Primary Tidal Lag Angle")
     eps2 = CFG.getfloat("Additional Forces and Perturbations","Secondary Tidal Lag Angle")
-    Msun = CFG.getfloat("Additional Forces and Perturbations","Solar Mass")
+    Msun = CFG.getfloat("Additional Forces and Perturbations","Sun Mass")
     
     # check initial conditions type with fahnestock flag
     if fahnestock_flag==1:
