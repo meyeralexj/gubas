@@ -1,7 +1,7 @@
 # GUBAS
 General Use Binary Asteroid Simulator
 
-Welcome the the GUBAS tool, please download the user guide for information on how to set up and use the tool.
+Welcome to the GUBAS tool, please download the user guide for information on how to set up and use the tool.
 The most recent GUBAS files are available in the master branch, and consist of 7 .py files, 1 .cpp file, and 1 .cfg file
 The original version of GUBAS is also available in the uploaded zip file. This version contains some minor bugs that have been fixed in the updated files.
 The master branch contains GUBAS code built to run on python2. See the relevant branch for a GUBAS version built to run on python3
