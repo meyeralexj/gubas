@@ -115,6 +115,9 @@ def hou_config_read(filename):
                 [-np.cos(th2)*np.sin(th3),-np.sin(th1)*np.sin(th2)*np.sin(th3)+np.cos(th1)*np.cos(th3),np.cos(th1)*np.sin(th2)*np.sin(th3)+np.sin(th1)*np.cos(th3)],\
                 [np.sin(th2),-np.sin(th1)*np.cos(th2),np.cos(th1)*np.cos(th2)]]).T          
             x0[21:30]=np.reshape(C,[1,9])
+        x0[9]=x0[21]*x0[9]+x0[22]*x0[10]+x0[23]*x0[11]# convert secondary angular velocity to A frame
+        x0[10]=x0[24]*x0[9]+x0[25]*x0[10]+x0[26]*x0[11]
+        x0[11]=x0[27]*x0[9]+x0[28]*x0[10]+x0[29]*x0[11]
         if Cc_flag==0:
             x0[12]=CFG.getfloat("Initial Conditions","A into N (1,1)")
             x0[13]=CFG.getfloat("Initial Conditions","A into N (1,2)")
