@@ -115,9 +115,6 @@ def hou_config_read(filename):
                 [-np.cos(th2)*np.sin(th3),-np.sin(th1)*np.sin(th2)*np.sin(th3)+np.cos(th1)*np.cos(th3),np.cos(th1)*np.sin(th2)*np.sin(th3)+np.sin(th1)*np.cos(th3)],\
                 [np.sin(th2),-np.sin(th1)*np.cos(th2),np.cos(th1)*np.cos(th2)]]).T          
             x0[21:30]=np.reshape(C,[1,9])
-        x0[9]=x0[21]*x0[9]+x0[22]*x0[10]+x0[23]*x0[11]# convert secondary angular velocity to A frame
-        x0[10]=x0[24]*x0[9]+x0[25]*x0[10]+x0[26]*x0[11]
-        x0[11]=x0[27]*x0[9]+x0[28]*x0[10]+x0[29]*x0[11]
         if Cc_flag==0:
             x0[12]=CFG.getfloat("Initial Conditions","A into N (1,1)")
             x0[13]=CFG.getfloat("Initial Conditions","A into N (1,2)")
@@ -137,4 +134,5 @@ def hou_config_read(filename):
                 [np.sin(th2),-np.sin(th1)*np.cos(th2),np.cos(th1)*np.cos(th2)]]).T  
             x0[12:21]=np.reshape(Cc,[1,9])
     
+        x0[9:12]=np.dot(C,np.array([x0[9:12]]).T).T[0]
     return(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun)
