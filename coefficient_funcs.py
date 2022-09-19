@@ -4,7 +4,8 @@ import scipy.io as io
 import numpy as np
 import random as rnd
 from numpy import linalg as la
-from numpy import math as ma
+# from numpy import math as ma #this import no longer necessary - harrison
+import math #we should use the standard math library instead of numpy.math
 
 # Hou expansion coefficients - see Hou 2016 for equation definitions/descriptions
 
@@ -12,18 +13,22 @@ from numpy import math as ma
 def tk_calc(m):
 	t=np.zeros([m+1,m//2+2])# create t matrix
 	for n in range(m+1):# loop through expansion orders up to truncation order
+		#in the following math.factorial() functions, it expects an integer but n/2. gives a float
+		#I suspect that this didn't trigger an error in python2
+		#but it errors with my python install. 
+		#for now I just use int(), which should be appropriate... -harrison
+		#also im not sure what/why so many float() functiosn are needed but leaving it for now
 		if np.mod(n,2.):# if odd
-			t[n,0]=(-1.)**((n-1.)/2.)*float(ma.factorial(n))/(2.**(n-1.)\
-				*(float(ma.factorial((n-1.)/2.))**2))
+			t[n,0]=(-1.)**((n-1.)/2.)*float(math.factorial(n))/(2.**(n-1.)\
+				*(float(math.factorial(int((n-1.)/2.)))**2))
 		else:# if even
-			t[n,0]=(-1.)**(n/2.)*float(ma.factorial(n))/(2.**n\
-				*(float(ma.factorial(n/2.))**2))
+			t[n,0]=(-1.)**(n/2.)*float(math.factorial(n))/(2.**n\
+				*(float(math.factorial(int(n/2.)))**2))
 		k=np.mod(n,2.)#set k looping index
 		i=1# set i looping index
 		while k<=n:# recursion loop
 			t[n,i]=-(n-k)*(n+k+1.)*t[n,i-1]/((k+2.)*(k+1.))
 			# print k,t[n],t[n,i-1]
-			# print t
 			k+=2.
 			i+=1
 	return t

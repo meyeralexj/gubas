@@ -1,0 +1,16 @@
+#files to ignore
+
+.DS_Store
+hou_cpp_final
+ID*.csv
+ID*.mat
+TD*.mat
+TD*.csv
+LagrangianStateOut*.csv
+Conservation*.csv
+Energy*.csv
+FHamiltonian*.csv
+Hamiltonian*.csv
+-r output_t/
+-r output_x/
+ic_input.txt
