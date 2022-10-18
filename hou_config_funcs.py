@@ -36,6 +36,7 @@ def hou_config_read(filename):
     vert_fileB=CFG.get("Body Model Definitions","Secondary Vertex File")
     
     # get output settings
+    postProcessing=CFG.getint("Output Settings", "Post Processing") #added by hagrusa, option to only output binaries
     out_freq=CFG.getfloat("Output Settings", "Fixed Output Frequency")
     out_time_name=CFG.get("Output Settings","Specified Time List Filename")
     case=CFG.get("Output Settings","Case Name")
@@ -135,4 +136,4 @@ def hou_config_read(filename):
             x0[12:21]=np.reshape(Cc,[1,9])
     
         x0[9:12]=np.dot(C,np.array([x0[9:12]]).T).T[0]
-    return(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun)
+    return(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,postProcessing)

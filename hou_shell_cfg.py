@@ -28,7 +28,7 @@ exec(open('hou_config_funcs.py').read())# Config file readin
 
 ## variables
 # read in config file
-(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun)=hou_config_read("hou_config.cfg")
+(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,postProcessing)=hou_config_read("hou_config.cfg")
 n=max(nA,nB) # set mutual potential expansion order to max inertia integral expansion order
 print("\n### Expansion Order Set To: {val} ###\n".format(val=n))
 
@@ -132,6 +132,11 @@ mu=G*(Mc+Ms)
 ## post processing
 row_len=30 # xout.bin has row entries of length 30 (30 integrated state variables)
 print('Post Processing...')
+if not postProcessing:
+	print("Just kidding, we are not post processing. Outputing output_t/t_out.bin and output_x/x_out.bin only.")
+	print(datetime.datetime.now())
+	quit()
+
 
 if os.path.isfile('LagrangianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
 	os.remove('LagrangianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
