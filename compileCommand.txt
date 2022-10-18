@@ -1,0 +1,1 @@
+g++ -std=c++11 hou_cpp.cpp -o hou_cpp_final -larmadillo
