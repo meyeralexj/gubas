@@ -12,10 +12,11 @@ import subprocess
 import datetime
 
 def read_bench(filep,files):# filep is parameters file, files is states file both in Fahnestock format
-	fin=open(filep,'r')#load parameters files
-	params = fin.readline()
-	params = map(float, params.strip().split('  '))
-	fin.close()
+	# fin=open(filep,'r')#load parameters files
+	# params = fin.readline()
+	# params = map(float, params.strip().split('  '))
+	# fin.close()
+	params = np.genfromtxt(filep) #added by hagrusa
 
 	rhoA=params[0]*1000.**3#get density - convert from kg/m3 to kg/km3
 	rhoB=params[1]*1000.**3
@@ -28,10 +29,12 @@ def read_bench(filep,files):# filep is parameters file, files is states file bot
 	m=params[24]#mass ratio
 	G=params[31]/(1000.**3)#gravity constant
 
-	fin=open(files,'r')
-	states = fin.readline()#load states files
-	states = map(float, states.strip().split('  '))
-	fin.close()
+	# fin=open(files,'r')
+	# states = fin.readline()#load states files
+	# states = map(float, states.strip().split('  '))
+	# fin.close()
+	states = np.genfromtxt(files) #added by hagrusa
+	
 	r0=np.array(states[0:3])/1000.#rel pos in A - m to km
 	v0=np.array(states[3:6])/m/1000.# rel vel in A - m to km
 	wc0=np.dot(la.inv(IA),np.array([states[6:9]]).T)# get primary ang vel in A
