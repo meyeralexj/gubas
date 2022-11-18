@@ -108,6 +108,8 @@ def hou_config_read(filename):
             x0[27]=CFG.getfloat("Initial Conditions","B into A (3,1)")
             x0[28]=CFG.getfloat("Initial Conditions","B into A (3,2)")
             x0[29]=CFG.getfloat("Initial Conditions","B into A (3,3)")
+            C=np.reshape(x0[21:30],[3,3])
+
         else:# if user defines euler angles use this rotation matrix definition - MAKE SURE INPUT EULER ANGLES MATCH THEIR DEFINITIONS
             th1=CFG.getfloat("Initial Conditions","B into A Euler 1 X")
             th2=CFG.getfloat("Initial Conditions","B into A Euler 2 Y")
@@ -116,6 +118,7 @@ def hou_config_read(filename):
                 [-np.cos(th2)*np.sin(th3),-np.sin(th1)*np.sin(th2)*np.sin(th3)+np.cos(th1)*np.cos(th3),np.cos(th1)*np.sin(th2)*np.sin(th3)+np.sin(th1)*np.cos(th3)],\
                 [np.sin(th2),-np.sin(th1)*np.cos(th2),np.cos(th1)*np.cos(th2)]]).T          
             x0[21:30]=np.reshape(C,[1,9])
+            
         if Cc_flag==0:
             x0[12]=CFG.getfloat("Initial Conditions","A into N (1,1)")
             x0[13]=CFG.getfloat("Initial Conditions","A into N (1,2)")
