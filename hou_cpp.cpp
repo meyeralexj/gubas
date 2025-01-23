@@ -25,6 +25,7 @@ struct parameters{
     cube* TA;//primary inertia integrals - units of km, kg
     cube* TB;//secondary inertia integrals - units of km,kg
     cube* TBp;//TB rotated from B to A frame
+    cube* Tsc;
     cube* TS;// sphere inertia integral
     cube* Tsun;
     field<cube>* dT;//partials of TBp with respect to elements of the rotation matrix which transforms from to B to A
@@ -38,43 +39,47 @@ struct parameters{
     sp_mat* a;// set of a expansion coefficients
     sp_mat* b;// set of b expansion coefficients
     int* n;//mutual potential truncation order
-    int* flyby_toggle;//toggle to turn on 3rd body perturber
-    int* helio_toggle;//toggle to turn on solar perturbation
-    int* sg_toggle;//toggle to turn on legacy solar perturbation
-    int* tt_toggle;//toggle to turn on tidal torque
-    double* Mplanet;//mass of perturbing 3rd body
-    double* a_hyp;//semimajor axis of perturbing 3rd body
-    double* e_hyp;//eccentricity of perturbing 3rd body
-    double* i_hyp;//inclination of perturbing 3rd body
-    double* RAAN_hyp;//RAAN of perturbing 3rd body
-    double* om_hyp;//argument of periapsis of perturbing 3rd body
-    double* tau_hyp;//time of periapsis passage of perturbing 3rd body
-    double* n_hyp;//mean motion of perturbing 3rd body
-    double* Msolar;//solar mass
-    double* a_helio;//semimajor axis of solar orbit
-    double* e_helio;//eccentricity of solar orbit
-    double* i_helio;//inclination of solar orbit
-    double* RAAN_helio;//RAAN of solar orbit
-    double* om_helio;//argument of periapsis of solar orbit
-    double* tau_helio;//time of periapsis passage of solar orbit
-    double* n_helio;//mean motion of solar orbit
-    double* sol_rad;//legacy radius of circular orbit about the sun
-    double* au_def;//legacy definition of AU in km
-    double* love1;//love number of the primary
-    double* love2;//love number of the secondary
-    double* refrad1;//primary reference radius
-    double* refrad2;//secondary reference radius
-    double* rhoA;//primary density
-    double* rhoB;//secondary density
-    double* eps1;//primary tidal lag angle (related to quality factor Q)
-    double* eps2;//secondasry tidal lag angle (related to quality factor Q)
-    double* mean_motion;//legacy mean motion of circular orbit about the sun
-    mat* sg_acc;//legacy acceleration due to solar gravity
-    mat* acc_3BP;//acceleration due to 3rd body perturber
-    mat* acc_solar;//acceleration due to heliocentric orbit
-    mat* tt_1;//tidal torque on the primary caused by the secondary
-    mat* tt_2;//tidal torque on the secondary causecd by the primary
-    mat* tt_orbit;//acceleration on the orbit due to tidal torque
+    int* flyby_toggle;
+    int* helio_toggle;
+    int* sg_toggle;
+    int* tt_toggle;
+    double* Mplanet;
+    double* a_hyp;
+    double* e_hyp;
+    double* i_hyp;
+    double* RAAN_hyp;
+    double* om_hyp;
+    double* tau_hyp;
+    double* n_hyp;
+    double* Msolar;
+    double* a_helio;
+    double* e_helio;
+    double* i_helio;
+    double* RAAN_helio;
+    double* om_helio;
+    double* tau_helio;
+    double* n_helio;
+    double* sol_rad;
+    double* au_def;
+    double* love1;
+    double* love2;
+    double* refrad1;
+    double* refrad2;
+    double* rhoA;
+    double* rhoB;
+    double* eps1;
+    double* eps2;
+    double* mean_motion;
+    double* Msc;
+    double* Asc;
+    double* Csc;
+    mat* sg_acc;
+    mat* acc_3BP;
+    mat* acc_solar;
+    mat* acc_srp;
+    mat* tt_1;
+    mat* tt_2;
+    mat* tt_orbit;
 } inputs;
 
 // structure used to take in inputs file ("ic_inputs.txt")
@@ -108,33 +113,36 @@ struct initialization{
     int integ;//integrator choice flag
     double h;//fixed time step - sec
     double tol;//adaptive tolerance for rk78
-    int flyby_toggle;//toggle to turn on legacy solar perturbation
-    int helio_toggle;//toggle to turn on solar perturbation
-    int sg_toggle;//toggle to turn on legacy solar perturbation
-    int tt_toggle;//toggle to turn on tidal torque
-    double Mplanet;//mass of perturbing 3rd body
-    double a_hyp;//semimajor axis of perturbing 3rd body
-    double e_hyp;//eccentricity of perturbing 3rd body
-    double i_hyp;//inclination of perturbing 3rd body
-    double RAAN_hyp;//RAAN of perturbing 3rd body
-    double om_hyp;//argument of periapsis of perturbing 3rd body
-    double tau_hyp;//time of periapsis passage of perturbing 3rd body
-    double Msolar;//solar mass
-    double a_helio;//semimajor axis of solar orbit
-    double e_helio;//eccentricity of solar orbit
-    double i_helio;//inclination of solar orbit
-    double RAAN_helio;//RAAN of solar orbit
-    double om_helio;//argument of periapsis of solar orbit
-    double tau_helio;//time of periapsis passage of solar orbit
-    double sol_rad;//legacy radius of circular orbit about the sun
-    double au_def;//legacy definition of AU in km
-    double love1;//love number of the primary
-    double love2;//love number of the secondary
-    double refrad1;//primary reference radius
-    double refrad2;//secondary reference radius
-    double eps1;//primary tidal lag angle (related to quality factor Q)
-    double eps2;//secondasry tidal lag angle (related to quality factor Q)
-    double Msun;//solar mass
+    int flyby_toggle;
+    int helio_toggle;
+    int sg_toggle;
+    int tt_toggle;
+    double Mplanet;
+    double a_hyp;
+    double e_hyp;
+    double i_hyp;
+    double RAAN_hyp;
+    double om_hyp;
+    double tau_hyp;
+    double Msolar;
+    double a_helio;
+    double e_helio;
+    double i_helio;
+    double RAAN_helio;
+    double om_helio;
+    double tau_helio;
+    double sol_rad;
+    double au_def;
+    double love1;
+    double love2;
+    double refrad1;
+    double refrad2;
+    double eps1;
+    double eps2;
+    double Msun;
+    double Msc;
+    double Asc;
+    double Csc;
 } ics;
 
 //function declarations - descriptions at file definitions
@@ -160,7 +168,7 @@ double du_c(double G, int m, mat* t, sp_mat* a, sp_mat* b, mat e, double R, cube
 double potential(double G, int m, mat* t, sp_mat* a, sp_mat* b, mat e, double R, cube* TA, cube* TBp);
 void rk87(double t0, double tf, mat x0, double rel_tol, parameters inputs, mat* tout, mat* xout, std::function<mat(mat,mat, parameters)> ode);
 void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, mat* xout, mat* hout, mat* sunout, std::function<mat(mat,mat, parameters)> ode);
-void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, mat* xout, mat* hout, mat*sunout, std::function<mat(mat,mat, parameters)> ode);
+void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, mat* xout, std::function<mat(mat,mat, parameters)> ode);
 void LGVI_integ(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, mat* xout);
 void hamiltonian_map(double h, parameters inputs, mat* x, mat* x_out, mat* fab, mat* fna, mat* Fab,
  mat* Fna, mat* g_map, mat* G_map, mat* grad_G, mat* du_dr_n, mat* M_n, mat* x0);
@@ -177,7 +185,7 @@ void ic_read(initialization* ics);
 vec kepler2cart(double* a_hyp, double* e_hyp, double* i_hyp, double* RAAN_hyp, double* om_hyp, double f0_hyp, double* G, double* Mplanet);
 double kepler(double* n_hyp, double t, double* e_hyp, double* tau_hyp);
 void grav_3BP(vec R_s, mat* NA, mat* pos, double* nu, double* G, double* Mplanet, mat* acc_3BP);
-void solar_accel(vec R_s, mat* NA, mat* pos, double* nu, double* G, double* Msun, mat* acc_solar);
+void solar_accel(vec R_s, mat* NA, mat* pos, double* nu, double* G, double* Msun, mat* acc_solar, vec R_sc, mat* acc_solar_sc, double* Msc, double* Asc, double* Csc, double* refrad1, double* refrad2);
 
 int main() {
     cout.precision(16);
@@ -186,10 +194,10 @@ int main() {
     int order_a=ics.order_a;
     int order_b=ics.order_b;
     //various matrix declarations 
-    mat tk(order+1,order/2+2),IA(1,3),C(3,3),Cc(3,3),Cs(3,3),IB(1,3),sg_acc(3,1),acc_3BP(3,1),acc_solar(3,1),tt_1(3,1),tt_2(3,1),tt_orbit(3,1);
+    mat tk(order+1,order/2+2),IA(1,3),C(3,3),Cc(3,3),Cs(3,3),IB(1,3),sg_acc(3,1),acc_3BP(3,1),acc_solar(3,1),acc_srp(3,1),tt_1(3,1),tt_2(3,1),tt_orbit(3,1);
     mat IdA(3,3), IdB(3,3);
     IB.zeros();// There is a bug in Armadillo which results in IB having a value of NAN for its second entry if this call is not here, I've only seen this issue on Nexus, but it should be looked into at some point - Alex Davis
-    cube TA,TB,TBp,TS,Tsun;
+    cube TA,TB,TBp,Tsc,TS,Tsun;
     field<cube> dT(3,3);
     sp_mat a(1,t_ind(order,order,order,order,order,order,order,order+1)+1);//max dimension of object with armadillo is 3, a nd b sets need to be 7 dimensional to t_ind func is used to map 7d into 2d matrix
     sp_mat b(1,t_ind(order,order,order,order,order,order,order,order+1)+1);
@@ -197,7 +205,6 @@ int main() {
     string vert_fileA=ics.vfa;
     string tet_fileB=ics.tfb;
     string vert_fileB=ics.vfb;
-
 
     double G=ics.G;
     double rhoA=ics.rhoA;
@@ -231,6 +238,9 @@ int main() {
     double eps1=ics.eps1;
     double eps2=ics.eps2;
     double Msun=ics.Msun;
+    double Msc=ics.Msc;
+    double Asc=ics.Asc;
+    double Csc=ics.Csc;
     if (ics.Tgen){//generates inertia integrals if flag is set to 1
         cout<<"Generating Inertia Integrals"<<endl;
         //conditional to check what primary shape is set to
@@ -281,14 +291,17 @@ int main() {
         IB.save("IDS.csv",csv_ascii);
 
     }
+
     TA.load("TDP_"+std::to_string(ics.order)+".mat");
     TB.load("TDS_"+std::to_string(ics.order)+".mat");
     IA.load("IDP.mat");
     IB.load("IDS.mat");
     TS.zeros(size(TA));
     Tsun.zeros(size(TA));
+    Tsc.zeros(size(TA));
     TS(0,0,0)=Mplanet;
     Tsun(0,0,0)=Msolar;
+    Tsc(0,0,0)=Msc;
     // calculate expansion coefficients
     tk_calc(order,&tk);
     a_calc(order,&a);
@@ -303,7 +316,7 @@ int main() {
     //set up times for integration
     double t0=ics.t0;
     double tf=ics.tf;
-    x0=ics.x0;//unpack initial states from input structure
+    x0=ics.x0;//unpack initial states from input 
     // set pointers for system parameter pointer structure (parameters inputs above)
     inputs.G=&G;
     inputs.IA=&IA;
@@ -313,6 +326,7 @@ int main() {
     inputs.TA=&TA;
     inputs.TB=&TB;
     inputs.TBp=&TBp;
+    inputs.Tsc=&Tsc;
     inputs.TS=&TS;
     inputs.Tsun=&Tsun;
     inputs.a=&a;
@@ -354,31 +368,35 @@ int main() {
     inputs.eps2=&eps2;
     inputs.acc_3BP=&acc_3BP;
     inputs.acc_solar=&acc_solar;
+    inputs.acc_srp=&acc_srp;
     inputs.sg_acc=&sg_acc;
     inputs.tt_1=&tt_1;
     inputs.tt_2=&tt_2;
     inputs.tt_orbit=&tt_orbit;
     inputs.mean_motion=&mean_motion;
+    inputs.Msc=&Msc;
+    inputs.Asc=&Asc;
+    inputs.Csc=&Csc;
     //set up integration time matrix
     mat t(1,1);
     t<<t0<<endr;
 
     cout<<"Integrating"<<endl;
     if (ics.integ==1){
-        cout<<"RK4"<<endl;//RK4 integrator
+        cout<<"RK4"<<endl;
         rk4_stack(t0, tf, x0, ics.h, inputs,&t_sol, &x_sol, &h_sol, &sun_sol, hou_ode);
     }
     else if (ics.integ==2){
-        cout<<"LGVI"<<endl;//LGVI integrator
+        cout<<"LGVI"<<endl;
         LGVI_integ(t0, tf, x0, ics.h, inputs, &t_sol, &x_sol);
     }
     else if (ics.integ==3){
-        cout<<"RK 7(8)"<<endl;//RK7 (8) integrator
+        cout<<"RK 7(8)"<<endl;
         rk87(t0, tf, x0, ics.tol, inputs,&t_sol, &x_sol, hou_ode);
     }
     else if (ics.integ==4){
-        cout<<"ABM"<<endl;// A-B-M integrator
-        ABM(t0, tf, x0, ics.h, inputs,&t_sol, &x_sol, &h_sol, &sun_sol, hou_ode);
+        cout<<"ABM"<<endl;
+        ABM(t0, tf, x0, ics.h, inputs,&t_sol, &x_sol, hou_ode);
     }
     // the below commented sections is the post-processing loop in cpp and can be uncommented for use if the user desires - this has not been rigorously tested as this file is designed for the wrapping described in the documentation
    // cout<<"Post-Processing"<<endl;
@@ -1276,22 +1294,6 @@ void rk87(double t0, double tf, mat x0, double rel_tol, parameters inputs, mat* 
     return;
 }
 
-//This is a standard implementation of the fixed step RK 4 Integrator, the derivation and analysis of which can be found throughout the literature.The output
-//is binary files of the states and time written for each evaluation of the dynamics. The dynamics used by the integrator can be changed using the ode function
-//
-//inputs: t0 - initial time (units of input states)
-//tf - final time (units of the input states)
-//x0 - row vector of the the states, the ode function must be set up to take in x0 in the form input to this function
-//h - integration time step (units of input states)
-//inputs - structure of parameters which may be needed by the ode function.
-//tout - pointer to a matrix which will be used to house the output times
-//xout - point to a matrix which will be used to house the output states
-//ode - function which takes as inputs the states as x0, the time as a scalar and the inputs structure
-//outputs: the integrator will save two binary files in subfolders output_t and output_x (be careful these are deleted with each run).
-//the binary files are single line wrappings of the tout and xout matrix, which is to say the each row of xout is entered in line in the output binary
-//the same occurs for the output time
-//if the flyby or heliocentric toggles are turned on, the integrator also saves binary files for the perturbing body relative to the binary system barycenter.
-//hout and sunout and pointers to a matrix to house the states of the perturber (3rd body or the sun)
 void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, mat* xout, mat* hout, mat*sunout, std::function<mat(mat,mat, parameters)> ode){
     //system commands which remove old integrated files and create new output directories
     system("if [ -d output_t ]; then rm -rf output_t; fi; mkdir output_t");
@@ -1302,10 +1304,11 @@ void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* t
     ofstream xfile("output_x/x_out.bin", std::ios::binary);
     ofstream hfile("output_h/h_out.bin", std::ios::binary);
     ofstream sunfile("output_sun/sun_out.bin", std::ios::binary);
-
     //set up rk4 variables and k's for rk computation
     mat k1,k2,k3,k4,y0,y,next_y;
     mat t(1,1);
+    mat X_s(3,1), X_helio(3,1);
+    double f0_hyp, f0_helio;
     t<<t0<<endr;
     y0=x0;
     //matrices are initialized to a limitted size. As the integrator reaches this limited size (the number of integration steps to reach one day in seconds)
@@ -1316,15 +1319,27 @@ void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* t
     (*tout).resize(int(3600*24/h),1);
     (*tout).row(0)=t(0,0);
 
-    double f0_hyp = kepler(inputs.n_hyp, t0, inputs.e_hyp, inputs.tau_hyp);
-    vec X_s = kepler2cart(inputs.a_hyp, inputs.e_hyp, inputs.i_hyp, inputs.RAAN_hyp, inputs.om_hyp, f0_hyp, inputs.G, inputs.Mplanet);
-    (*hout).resize(int(3600*24/h),X_s.n_rows);
-    (*hout).row(0)=X_s.t();
+    if ((*(inputs.flyby_toggle))==1){
+        f0_hyp = kepler(inputs.n_hyp, t0, inputs.e_hyp, inputs.tau_hyp);
+        X_s = kepler2cart(inputs.a_hyp, inputs.e_hyp, inputs.i_hyp, inputs.RAAN_hyp, inputs.om_hyp, f0_hyp, inputs.G, inputs.Mplanet);
+        (*hout).resize(int(3600*24/h),X_s.n_rows);
+        (*hout).row(0)=X_s.t();
+    }
+    else{
+        f0_hyp = 0.;
+        X_s.zeros();
+    }
 
-    double f0_helio = kepler(inputs.n_helio, t0, inputs.e_helio, inputs.tau_helio);
-    vec X_helio = kepler2cart(inputs.a_helio, inputs.e_helio, inputs.i_helio, inputs.RAAN_helio, inputs.om_helio, f0_helio, inputs.G, inputs.Msolar);
-    (*sunout).resize(int(3600*24/h),X_helio.n_rows);
-    (*sunout).row(0)=X_helio.t();
+    if ((*(inputs.helio_toggle))==1){
+        f0_helio = kepler(inputs.n_helio, t0, inputs.e_helio, inputs.tau_helio);
+        X_helio = kepler2cart(inputs.a_helio, inputs.e_helio, inputs.i_helio, inputs.RAAN_helio, inputs.om_helio, f0_helio, inputs.G, inputs.Msolar);
+        (*sunout).resize(int(3600*24/h),X_helio.n_rows);
+        (*sunout).row(0)=X_helio.t();
+    }
+    else{
+        f0_helio = 0.;
+        X_helio.zeros();
+    }
 
     int count=0;
     int files=1;
@@ -1346,12 +1361,12 @@ void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* t
                 for (int indc=0;indc<(*xout).n_cols;indc++){
                     xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
                 }
-                if(*inputs.flyby_toggle==1){
+                if ((*(inputs.flyby_toggle))==1){
                     for (int indc=0;indc<(*hout).n_cols;indc++){
                         hfile.write((char*) &((*hout)(indr,indc)), sizeof(double));
                     }
-                }   
-                if(*inputs.helio_toggle==1){
+                }
+                if ((*(inputs.helio_toggle))==1){
                     for (int indc=0;indc<(*sunout).n_cols;indc++){
                         sunfile.write((char*) &((*sunout)(indr,indc)), sizeof(double));
                     }
@@ -1368,12 +1383,12 @@ void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* t
             files++;
         }
 
-        if(*inputs.flyby_toggle==1){
+        if ((*(inputs.flyby_toggle))==1){
             f0_hyp = kepler(inputs.n_hyp, t_temp(0,0), inputs.e_hyp, inputs.tau_hyp);
             X_s = kepler2cart(inputs.a_hyp, inputs.e_hyp, inputs.i_hyp, inputs.RAAN_hyp, inputs.om_hyp, f0_hyp, inputs.G, inputs.Mplanet);
             (*hout).row(count+1)=X_s.t();
         }
-        if(*inputs.helio_toggle==1){
+        if ((*(inputs.helio_toggle))==1){
             f0_helio = kepler(inputs.n_helio, t_temp(0,0), inputs.e_helio, inputs.tau_helio);
             X_helio = kepler2cart(inputs.a_helio, inputs.e_helio, inputs.i_helio, inputs.RAAN_helio, inputs.om_helio, f0_helio, inputs.G, inputs.Msolar);
             (*sunout).row(count+1)=X_helio.t();
@@ -1385,10 +1400,12 @@ void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* t
     }
     //now that integration loop is done write out any other output data to binary files
     if (count==0){
-        if(*inputs.flyby_toggle==1){
+        if ((*(inputs.flyby_toggle))==1){
             (*hout)=X_s.t();
         }
-        (*sunout)=X_helio.t();
+        if ((*(inputs.flyby_toggle))==1){
+            (*sunout)=X_helio.t();
+        }
         (*tout)=t_temp+h;
         (*xout)=next_y;
         for (int indr=0;indr<(*xout).n_rows;indr++){
@@ -1396,34 +1413,38 @@ void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* t
             for (int indc=0;indc<(*xout).n_cols;indc++){
                 xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
             }
-            if(*inputs.flyby_toggle==1){
+            if ((*(inputs.flyby_toggle))==1){
                 for (int indc=0;indc<(*hout).n_cols;indc++){
                     hfile.write((char*) &((*hout)(indr,indc)), sizeof(double));
                 }
             }
-            if(*inputs.helio_toggle==1){
-                for (int indc=0;indc<(*sunout).n_cols;indc++){
+            if ((*(inputs.helio_toggle))==1){
+                for (int indc=0;indc<(*hout).n_cols;indc++){
                     sunfile.write((char*) &((*sunout)(indr,indc)), sizeof(double));
                 }
             }
         }
     }
     else{
-        (*xout)=(*xout)(span(0,count),span(0,29));
+        (*xout)=(*xout)(span(0,count),span(0,35));
         (*tout)=(*tout)(span(0,count),0);
-        (*hout)=(*hout)(span(0,count),span(0,5));
-        (*sunout)=(*sunout)(span(0,count),span(0,5));
+        if ((*(inputs.flyby_toggle))==1){
+            (*hout)=(*hout)(span(0,count),span(0,5));
+        }
+        if ((*(inputs.helio_toggle))==1){
+            (*sunout)=(*sunout)(span(0,count),span(0,5));
+        }
         for (int indr=0;indr<(*xout).n_rows;indr++){
             tfile.write((char*) &((*tout)(indr,0)), sizeof(double));
             for (int indc=0;indc<(*xout).n_cols;indc++){
                 xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
             }
-            if(*inputs.flyby_toggle==1){
+            if ((*(inputs.flyby_toggle))==1){
                 for (int indc=0;indc<(*hout).n_cols;indc++){
                     hfile.write((char*) &((*hout)(indr,indc)), sizeof(double));
                 }
             }
-            if(*inputs.helio_toggle==1){
+            if ((*(inputs.helio_toggle))==1){
                 for (int indc=0;indc<(*sunout).n_cols;indc++){
                     sunfile.write((char*) &((*sunout)(indr,indc)), sizeof(double));
                 }
@@ -1440,32 +1461,12 @@ void rk4_stack(double t0, double tf, mat x0, double h, parameters inputs, mat* t
     return;    
 }
 
-//This is a fixed timestep standard Adams-Bashforth-Moulton predictor-corrector integrator. The output
-//is binary files of the states and time written for each evaluation of the dynamics. The dynamics used by the integrator can be changed using the ode function
-//
-//inputs: t0 - initial time (units of input states)
-//tf - final time (units of the input states)
-//x0 - row vector of the the states, the ode function must be set up to take in x0 in the form input to this function
-//h - integration time step (units of input states)
-//inputs - structure of parameters which may be needed by the ode function.
-//tout - pointer to a matrix which will be used to house the output times
-//xout - point to a matrix which will be used to house the output states
-//ode - function which takes as inputs the states as x0, the time as a scalar and the inputs structure
-//outputs: the integrator will save two binary files in subfolders output_t and output_x (be careful these are deleted with each run).
-//the binary files are single line wrappings of the tout and xout matrix, which is to say the each row of xout is entered in line in the output binary
-//the same occurs for the output time
-//if the flyby or heliocentric toggles are turned on, the integrator also saves binary files for the perturbing body relative to the binary system barycenter.
-//hout and sunout and pointers to a matrix to house the states of the perturber (3rd body or the sun)
-void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, mat* xout, mat* hout, mat*sunout, std::function<mat(mat,mat, parameters)> ode){
+void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, mat* xout, std::function<mat(mat,mat, parameters)> ode){
     //system commands which remove old integrated files and create new output directories
     system("if [ -d output_t ]; then rm -rf output_t; fi; mkdir output_t");
     system("if [ -d output_x ]; then rm -rf output_x; fi; mkdir output_x");
-    system("if [ -d output_h ]; then rm -rf output_h; fi; mkdir output_h");
-    system("if [ -d output_sun ]; then rm -rf output_sun; fi; mkdir output_sun");
     ofstream tfile("output_t/t_out.bin", std::ios::binary);
     ofstream xfile("output_x/x_out.bin", std::ios::binary);
-    ofstream hfile("output_h/h_out.bin", std::ios::binary);
-    ofstream sunfile("output_sun/sun_out.bin", std::ios::binary);
     //set up rk4 variables and k's for rk computation
     mat k1,k2,k3,k4,y0,y,next_y,y_0,y_1,y_2,y_3,f_0,f_1,f_2,f_3,f_p;
     mat t(1,1);
@@ -1478,17 +1479,6 @@ void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, m
     (*xout).row(0)=y0;
     (*tout).resize(int(3600*24/h),1);
     (*tout).row(0)=t(0,0);
-
-    double f0_hyp = kepler(inputs.n_hyp, t0, inputs.e_hyp, inputs.tau_hyp);
-    vec X_s = kepler2cart(inputs.a_hyp, inputs.e_hyp, inputs.i_hyp, inputs.RAAN_hyp, inputs.om_hyp, f0_hyp, inputs.G, inputs.Mplanet);
-    (*hout).resize(int(3600*24/h),X_s.n_rows);
-    (*hout).row(0)=X_s.t();
-
-    double f0_helio = kepler(inputs.n_helio, t0, inputs.e_helio, inputs.tau_helio);
-    vec X_helio = kepler2cart(inputs.a_helio, inputs.e_helio, inputs.i_helio, inputs.RAAN_helio, inputs.om_helio, f0_helio, inputs.G, inputs.Msolar);
-    (*sunout).resize(int(3600*24/h),X_helio.n_rows);
-    (*sunout).row(0)=X_helio.t();
-
     int count=0;
     int files=1;
     mat t_temp,y_temp,y_pred,t_0,t_1,t_2,t_3;
@@ -1512,6 +1502,7 @@ void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, m
         else{
             t_0=(*tout)(count,0);
             y_0=(*xout).row(count);
+
             f_0=ode(y_0,t_0,inputs);
             //Predictor steps
             if(t(0,0)<=4*h){
@@ -1525,26 +1516,53 @@ void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, m
                 f_2=ode(y_2,t_2,inputs);
                 f_3=ode(y_3,t_3,inputs);
             }
-            //Predictor Calculation
             y_pred = y_0 + (h/24.)*(55.*f_0.t()-59.*f_1.t()+37.*f_2.t()-9.*f_3.t());
             //Corrector calculation
             f_p=ode(y_pred,t_0+h,inputs);
             next_y = y_0 + (h/24.)*(9.*f_p.t()+19.*f_0.t()-5.*f_1.t()+f_2.t());
+
+            mat r = next_y.cols(0,2);
+            mat s_sc = next_y.cols(30,32);
+            r.reshape(3,1);
+            s_sc.reshape(3,1);
+            mat r_sca = s_sc-(*inputs.nu)*(-r);
+            mat r_scb = s_sc-(1.-*inputs.nu)*r;
+            double R_sca=norm(r_sca,2);
+            double R_scb=norm(r_scb,2);
+            if (R_sca>20. || R_sca < 0.3 || R_scb < 0.06){
+                cout<<"Terminating Simulation"<<endl;
+                if (count==0){
+                    (*tout)=t_temp+h;
+                    (*xout)=next_y;
+                    for (int indr=0;indr<(*xout).n_rows;indr+=5){
+                        tfile.write((char*) &((*tout)(indr,0)), sizeof(double));
+                        for (int indc=0;indc<(*xout).n_cols;indc++){
+                            xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
+                        }
+                    }
+                }
+                else{
+                    (*xout)=(*xout)(span(0,count),span(0,35));
+                    (*tout)=(*tout)(span(0,count),0);
+                    for (int indr=0;indr<(*xout).n_rows;indr+=5){
+                        tfile.write((char*) &((*tout)(indr,0)), sizeof(double));
+                        for (int indc=0;indc<(*xout).n_cols;indc++){
+                            xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
+                        }
+                    }
+        
+                }
+                //close binary files
+                xfile.close();
+                tfile.close();
+                return;
+            }
+
             if (count==(int(86400/h)-1)){//this is the print out to the binary files
-                for (int indr=0;indr<(*xout).n_rows;indr++){
+                for (int indr=0;indr<(*xout).n_rows;indr+=5){
                     tfile.write((char*) &((*tout)(indr,0)), sizeof(double));
                     for (int indc=0;indc<(*xout).n_cols;indc++){
                         xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
-                    }
-                    if(*inputs.flyby_toggle==1){
-                        for (int indc=0;indc<(*hout).n_cols;indc++){
-                            hfile.write((char*) &((*hout)(indr,indc)), sizeof(double));
-                        }
-                    }
-                    if(*inputs.helio_toggle==1){
-                        for (int indc=0;indc<(*sunout).n_cols;indc++){
-                            sunfile.write((char*) &((*sunout)(indr,indc)), sizeof(double));
-                        }
                     }
                 }
                 //now that data is printed to binary files we rezero storage matrix
@@ -1552,21 +1570,10 @@ void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, m
                 count=-1;
                 (*xout).zeros();
                 (*tout).zeros();
-                (*hout).zeros();
-                (*sunout).zeros();
                 cout<<files<<endl;
                 files++;
+
             }
-        if(*inputs.flyby_toggle==1){    
-            f0_hyp = kepler(inputs.n_hyp, t_0(0,0), inputs.e_hyp, inputs.tau_hyp);
-            X_s = kepler2cart(inputs.a_hyp, inputs.e_hyp, inputs.i_hyp, inputs.RAAN_hyp, inputs.om_hyp, f0_hyp, inputs.G, inputs.Mplanet);
-            (*hout).row(count+1)=X_s.t();
-        }
-        if(*inputs.helio_toggle==1){ 
-            f0_helio = kepler(inputs.n_helio, t_0(0,0), inputs.e_helio, inputs.tau_helio);
-            X_helio = kepler2cart(inputs.a_helio, inputs.e_helio, inputs.i_helio, inputs.RAAN_helio, inputs.om_helio, f0_helio, inputs.G, inputs.Msolar);
-            (*sunout).row(count+1)=X_helio.t();
-        }
         (*xout).row(count+1)=next_y;
         (*tout).row(count+1)=t_0+h;
         count++;
@@ -1580,44 +1587,20 @@ void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, m
     if (count==0){
         (*tout)=t_temp+h;
         (*xout)=next_y;
-        (*hout)=X_s.t();
-        (*sunout)=X_helio.t();
-        for (int indr=0;indr<(*xout).n_rows;indr++){
+        for (int indr=0;indr<(*xout).n_rows;indr+=5){
             tfile.write((char*) &((*tout)(indr,0)), sizeof(double));
             for (int indc=0;indc<(*xout).n_cols;indc++){
                 xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
-            }
-            if(*inputs.flyby_toggle==1){
-                for (int indc=0;indc<(*hout).n_cols;indc++){
-                     hfile.write((char*) &((*hout)(indr,indc)), sizeof(double));
-                }
-            }
-            if(*inputs.helio_toggle==1){
-                for (int indc=0;indc<(*sunout).n_cols;indc++){
-                    sunfile.write((char*) &((*sunout)(indr,indc)), sizeof(double));
-                }
             }
         }
     }
     else{
-        (*xout)=(*xout)(span(0,count),span(0,29));
+        (*xout)=(*xout)(span(0,count),span(0,35));
         (*tout)=(*tout)(span(0,count),0);
-        (*hout)=(*hout)(span(0,count),span(0,5));
-        (*sunout)=(*sunout)(span(0,count),span(0,5));
-        for (int indr=0;indr<(*xout).n_rows;indr++){
+        for (int indr=0;indr<(*xout).n_rows;indr+=5){
             tfile.write((char*) &((*tout)(indr,0)), sizeof(double));
             for (int indc=0;indc<(*xout).n_cols;indc++){
                 xfile.write((char*) &((*xout)(indr,indc)), sizeof(double));
-            }
-            if(*inputs.flyby_toggle==1){
-                for (int indc=0;indc<(*hout).n_cols;indc++){
-                    hfile.write((char*) &((*hout)(indr,indc)), sizeof(double));
-                }
-            }
-            if(*inputs.helio_toggle==1){
-                for (int indc=0;indc<(*sunout).n_cols;indc++){
-                    sunfile.write((char*) &((*sunout)(indr,indc)), sizeof(double));
-                }
             }
         }
         
@@ -1625,8 +1608,6 @@ void ABM(double t0, double tf, mat x0, double h, parameters inputs, mat* tout, m
     //close binary files
     xfile.close();
     tfile.close();
-    hfile.close();
-    sunfile.close();
     return;    
 }
 
@@ -1944,7 +1925,7 @@ void map_potential_partials(mat* C, mat* r, parameters inputs, mat* du_dr, mat* 
 }
 
 //Continuous Equations of motion implemented from Maciejewski 1995 as modeled after the realization specified in Hou 2016
-//This is the ODE file used for the RK 4, RK 7(8), and ABM. Units of km kg and sec
+//This is the ODE file used for the RK 4 and RK 7(8). Units of km kg and sec
 //inputs: x - row vector of input states specified in A frame with order [r,v,wc,ws,Cc,C], rotation matrices assumed to be row wrapped
 //t - time seconds, this parameter is not used
 //parameters inputs - structure defined at top of this code and commented in detail
@@ -1958,39 +1939,46 @@ mat hou_ode(mat x, mat t, parameters inputs){
     mat ws=x.cols(9,11);
     mat Cc=x.cols(12,20);
     mat C=x.cols(21,29);
+    mat s_sc = x.cols(30,32);
+    mat v_sc = x.cols(33,35);
     double time = t(0,0);
     r.reshape(3,1);
     v.reshape(3,1);
     wc.reshape(3,1);
     ws.reshape(3,1);
     Cc.reshape(3,3);
+    s_sc.reshape(3,1);
+    v_sc.reshape(3,1);
     Cc=Cc.t();//reshape is columnwise here so have to transpose to fix
     C.reshape(3,3);
     C=C.t();
+    mat r_sca = s_sc-(*inputs.nu)*(-r);
+    mat r_scb = s_sc-(1.-*inputs.nu)*r;
     //set up rotated states and inertias
     mat Ic_inv(3,3),Is_inv(3,3);
     double R=norm(r,2);//used for potential
+    double R_sca=norm(r_sca,2);
+    double R_scb=norm(r_scb,2);
     mat e=r.t()/R;//used for potential, must be row vec
+    mat e_sca = r_sca.t()/R_sca;
+    mat e_scb = r_scb.t()/R_scb;
     Ic_inv<<1./ (*(inputs.IA))(0,0)<<0.<<0.<<endr<<0.<<1./ (*(inputs.IA))(0,1)<<0.<<endr<<0.<<0.<<1./ (*(inputs.IA))(0,2)<<endr;
     Is_inv<<1./ (*(inputs.IB))(0,0)<<0.<<0.<<endr<<0.<<1./ (*(inputs.IB))(0,1)<<0.<<endr<<0.<<0.<<1./ (*(inputs.IB))(0,2)<<endr;
     mat Is_inv_c=C*Is_inv*C.t();
     mat wc_tilde=tilde_op(wc(0,0),wc(1,0),wc(2,0));
     mat ws_s=C.t()*ws;
     mat ws_tilde=tilde_op(ws_s(0,0),ws_s(1,0),ws_s(2,0));
+
     //rotate secondary inertia integrals
     inertia_rot(C, *(inputs.n), inputs.TB, inputs.TBp);
-    //get additional force values
 
-    // Compute 3rd body perturbation
+    //get additional force values
     mat M_sa(3,1),M_sb(3,1);
     if ((*(inputs.flyby_toggle))==1){
-        // True anomaly of 3rd body relative to binary barycenter
         double f0_hyp = kepler(inputs.n_hyp, time, inputs.e_hyp, inputs.tau_hyp);
-        // Keplerian elements of 3rd body relative to binary barycenter
         vec X_s = kepler2cart(inputs.a_hyp, inputs.e_hyp, inputs.i_hyp, inputs.RAAN_hyp, inputs.om_hyp, f0_hyp, inputs.G, inputs.Mplanet);
         vec R_s;
         R_s<<X_s(0)<<endr<<X_s(1)<<endr<<X_s(2)<<endr;
-        // 3rd body gravitational perturbation
         grav_3BP(R_s, &Cc, &r, inputs.nu, inputs.G, inputs.Mplanet, inputs.acc_3BP);
         vec R_sa = Cc.t()*R_s+(*inputs.nu)*(r);
         vec R_sb = Cc.t()*R_s-(1-(*inputs.nu))*(r);
@@ -2009,7 +1997,7 @@ mat hou_ode(mat x, mat t, parameters inputs){
         du_drsb(1,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_sb, Rsb_mag, 1, inputs.TBp, inputs.TS);
         du_drsb(2,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_sb, Rsb_mag, 2, inputs.TBp, inputs.TS);
 
-        // Compute torques in A frame due to 3rd body perturbation
+        // Compute torques in A frame
         M_sa=cross(R_sa,du_drsa);
         M_sb=cross(R_sb,du_drsb);
     }
@@ -2018,16 +2006,13 @@ mat hou_ode(mat x, mat t, parameters inputs){
         M_sa.zeros();
         M_sb.zeros();
     }
-    // Compute heliocentric perturbation
     mat M_suna(3,1),M_sunb(3,1);
     if ((*(inputs.helio_toggle))==1){
-        // True anomaly of sun relative to binary barycenter
         double f0_helio = kepler(inputs.n_helio, time, inputs.e_helio, inputs.tau_helio);
-        // Keplerian elements of sun relative to binary barycenter
         vec X_sun = kepler2cart(inputs.a_helio, inputs.e_helio, inputs.i_helio, inputs.RAAN_helio, inputs.om_helio, f0_helio, inputs.G, inputs.Msolar);
         vec R_sun;
         R_sun<<X_sun(0)<<endr<<X_sun(1)<<endr<<X_sun(2)<<endr;
-        solar_accel(R_sun, &Cc, &r, inputs.nu, inputs.G, inputs.Msolar, inputs.acc_solar);
+        solar_accel(R_sun, &Cc, &r, inputs.nu, inputs.G, inputs.Msolar, inputs.acc_solar, s_sc, inputs.acc_srp, inputs.Msc, inputs.Asc, inputs.Csc, inputs.refrad1, inputs.refrad2);
         vec R_suna = Cc.t()*R_sun+(*inputs.nu)*(r);
         vec R_sunb = Cc.t()*R_sun-(1-(*inputs.nu))*(r);
         double Rsuna_mag = norm(R_suna,2);
@@ -2045,23 +2030,22 @@ mat hou_ode(mat x, mat t, parameters inputs){
         du_drsunb(1,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_sunb, Rsunb_mag, 1, inputs.TBp, inputs.Tsun);
         du_drsunb(2,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_sunb, Rsunb_mag, 2, inputs.TBp, inputs.Tsun);
 
-        // Compute torques in A frame due to solar gravity perturbation
+        // Compute torques in A frame
         M_suna=cross(R_suna,du_drsuna);
         M_sunb=cross(R_sunb,du_drsunb);
     }
     else{
         (*(inputs.acc_solar)).zeros();
+        (*(inputs.acc_srp)).zeros();
         M_suna.zeros();
         M_sunb.zeros();
     }
-    // Legacy heliocentric perturbation
     if ((*(inputs.sg_toggle))==1){
         hill_solar_grav(&Cc, &r, &v, inputs.mean_motion, inputs.sg_acc);
     }
     else{
         (*(inputs.sg_acc)).zeros();
     }
-    // Compute energy dissipation due to gravitational tides between the primary and secondary
     if (*(inputs.tt_toggle)==1){
         md_tidal_torque(&r, &v, &wc, &ws, &Cc, &C, inputs);
     }
@@ -2070,7 +2054,7 @@ mat hou_ode(mat x, mat t, parameters inputs){
         (*(inputs.tt_2)).zeros();
         (*(inputs.tt_orbit)).zeros();
     }
-    
+
     //compute partials of rotated secondary inertia integrals with respect to each element of C
     dT_dc(0, 0, C, *(inputs.n), inputs.TB, &((*(inputs.dT))(0,0)));
     dT_dc(0, 1, C, *(inputs.n), inputs.TB, &((*(inputs.dT))(0,1)));
@@ -2099,6 +2083,16 @@ mat hou_ode(mat x, mat t, parameters inputs){
     du_dgam(0,0)=du_c(*(inputs.G), *(inputs.n), inputs.tk, inputs.a, inputs.b, e, R, inputs.TA, &((*(inputs.dT))(0,2)));
     du_dgam(1,0)=du_c(*(inputs.G), *(inputs.n), inputs.tk, inputs.a, inputs.b, e, R, inputs.TA, &((*(inputs.dT))(1,2)));
     du_dgam(2,0)=du_c(*(inputs.G), *(inputs.n), inputs.tk, inputs.a, inputs.b, e, R, inputs.TA, &((*(inputs.dT))(2,2)));
+
+    //compute dU_dr for spacecraft motion
+    mat du_drsca(3,1),du_drscb(3,1);
+    du_drsca(0,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_sca, R_sca, 0, inputs.TA, inputs.Tsc);
+    du_drsca(1,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_sca, R_sca, 1, inputs.TA, inputs.Tsc);
+    du_drsca(2,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_sca, R_sca, 2, inputs.TA, inputs.Tsc);
+    du_drscb(0,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_scb, R_scb, 0, inputs.TBp, inputs.Tsc);
+    du_drscb(1,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_scb, R_scb, 1, inputs.TBp, inputs.Tsc);
+    du_drscb(2,0)=du_x(*(inputs.G), *(inputs.n),inputs.tk, inputs.a, inputs.b, e_scb, R_scb, 2, inputs.TBp, inputs.Tsc);
+
     //compute angular momentum in A frame
     mat La=diagmat(*(inputs.IA))*wc;
     mat Lb=C*diagmat(*(inputs.IB))*ws_s;
@@ -2114,12 +2108,15 @@ mat hou_ode(mat x, mat t, parameters inputs){
     //rate of change of relative attitude matrix C comes from difference of primary and secondary angular velocities
     mat Cd=C*ws_tilde-wc_tilde*C;
     mat CdT=-ws_tilde*C.t()+C.t()*wc_tilde;
-    mat wcd=Ic_inv*(cross(La,wc)+Ma-(*(inputs.tt_1)));
+    mat wcd=Ic_inv*(cross(La,wc)+Ma+M_sa+M_suna)-(*(inputs.tt_1));
     //because of use of C and Cd must accounrt for partial of rotated inertia matrix with respect to time
-    mat wsd=Is_inv_c*(cross(Lb,wc)+Mb-Cd*diagmat(*(inputs.IB))*C.t()*ws
-            -C*diagmat(*(inputs.IB))*CdT*ws-(*(inputs.tt_2)));
+    mat wsd=Is_inv_c*(cross(Lb,wc)+Mb+M_sb+M_sunb-Cd*diagmat(*(inputs.IB))*C.t()*ws
+            -C*diagmat(*(inputs.IB))*CdT*ws)-(*(inputs.tt_2));
+    //spacecraft EOM
+    mat r_sc_d = cross(s_sc,wc)+v_sc;
+    mat v_sc_d = cross(v_sc,wc)-(1./ *(inputs.Msc))*du_drsca-(1./ *(inputs.Msc))*du_drscb+(*(inputs.acc_srp));
     //repack EOM results
-    mat xd(30,1);
+    mat xd(36,1);
     xd<<rd(0,0)<<endr<<rd(1,0)<<endr<<rd(2,0)<<endr<<vd(0,0)<<endr<<vd(1,0)<<
             endr<<vd(2,0)<<endr<<wcd(0,0)<<endr<<wcd(1,0)<<endr<<wcd(2,0)<<endr<<
             wsd(0,0)<<endr<<wsd(1,0)<<endr<<wsd(2,0)<<endr<<Cdc(0,0)<<endr<<
@@ -2127,12 +2124,11 @@ mat hou_ode(mat x, mat t, parameters inputs){
             Cdc(1,2)<<endr<<Cdc(2,0)<<endr<<Cdc(2,1)<<endr<<Cdc(2,2)<<endr<<
             Cd(0,0)<<endr<<Cd(0,1)<<endr<<Cd(0,2)<<endr<<Cd(1,0)<<endr<<
             Cd(1,1)<<endr<<Cd(1,2)<<endr<<Cd(2,0)<<endr<<Cd(2,1)<<endr<<
-            Cd(2,2)<<endr;
+            Cd(2,2)<<endr<<r_sc_d(0,0)<<endr<<r_sc_d(1,0)<<endr<<
+            r_sc_d(2,0)<<endr<<v_sc_d(0,0)<<endr<<v_sc_d(1,0)<<endr<<v_sc_d(2,0)<<endr;
     return xd;
 }
 
-// This is legacy code to calculate the effects of solar gravity. This assumes a planar circular orbit around the sun.
-// For a more accurate solar perturbation use heliocentric orbit perturbation.
 void hill_solar_grav(mat* NA, mat* pos, mat* vel, double* n, mat* acc){
     mat CHp_mat(3,3);
     CHp_mat.zeros();
@@ -2146,55 +2142,96 @@ void hill_solar_grav(mat* NA, mat* pos, mat* vel, double* n, mat* acc){
     return;
 }
 
-// This calculates the gravitational perturbation of a 3rd (spherical) body on the binary system
 void grav_3BP(vec R_s, mat* NA, mat* pos, double* nu, double* G, double* Mplanet, mat* acc_3BP){
     R_s = (*NA).t()*R_s;
     vec R = (*pos);
-    (*acc_3BP) = (*G)*(*Mplanet)*((R_s-(1-(*nu)*R))/(pow(norm(R_s-(1-(*nu)*R)),3))-(R_s+(*nu)*R)/(pow(norm(R_s+(*nu)*R),3)));
+    (*acc_3BP) = (*G)*(*Mplanet)*((R_s-(1.-(*nu)*R))/(pow(norm(R_s-(1.-(*nu)*R)),3.))-(R_s+(*nu)*R)/(pow(norm(R_s+(*nu)*R),3.)));
 }
 
-// This calculates the gravitational perturbation of the sun on the binary system
-void solar_accel(vec R_s, mat* NA, mat* pos, double* nu, double* G, double* Msun, mat* acc_solar){
+void solar_accel(vec R_s, mat* NA, mat* pos, double* nu, double* G, double* Msun, mat* acc_solar, vec R_sc, mat* acc_srp, double* Msc, double* Asc, double* Csc, double* refrad1, double* refrad2){
     R_s = (*NA).t()*R_s;
     vec R = (*pos);
-    (*acc_solar) = (*G)*(*Msun)*((R_s-(1-(*nu)*R))/(pow(norm(R_s-(1-(*nu)*R)),3))-(R_s+(*nu)*R)/(pow(norm(R_s+(*nu)*R),3)));
+    (*acc_solar) = (*G)*(*Msun)*((R_s-(1.-(*nu)*R))/(pow(norm(R_s-(1.-(*nu)*R)),3.))-(R_s+(*nu)*R)/(pow(norm(R_s+(*nu)*R),3.)));
+    vec R_sc_sun = R_s-R_sc;
+    // check shadow by primary
+    double d1 = pow(2.*dot(R_sc_sun/norm(R_sc_sun),R_sc),2.) - 4.*(dot(R_sc,R_sc) - pow((*refrad1),2.));
+    // check shadow by secondary
+    double d2 = pow(2.*dot(R_sc_sun/norm(R_sc_sun),(R_sc-R)),2.) - 4.*(dot((R_sc-R),(R_sc-R)) - pow((*refrad2),2.));
+    if (d1 > 0. && dot(R_sc,R_s)<0.){
+        (*acc_srp).zeros();
+    } else if (d2 > 0. && dot((R_sc-R),(R_s-R))<0.){
+        (*acc_srp).zeros();
+    } else{
+        (*acc_srp) = (*G)*(*Msun)*((R_sc_sun)/(pow(norm(R_sc_sun),3))-R_s/pow(norm(R_s),3)) - 1358.*pow((149597870./norm(R_sc_sun)),2)*(*Csc)*(*Asc)/1000000./((*Msc)*norm(R_sc_sun)*299792.458)*R_sc_sun;
+    }
 }
 
-// This calculates the tidal torque between both bodies and the orbit in order to simulate energy dissipation due to internal tidal effects
+
 void md_tidal_torque(mat* pos, mat* vel, mat* w1, mat* w2, mat* NA, mat* AB, parameters inputs){
     mat rhat = (*NA)*(*pos)/norm(*pos);
     mat vhat = (*NA)*(*vel)/norm(*vel);
     mat rcv = (*NA)*cross(*pos,*vel);
     mat zhat = rcv/norm(rcv);
+    mat yhat = cross(zhat,rhat)/norm(cross(zhat,rhat));
     mat wsys = rcv/pow(norm(*pos),2.);
-    // Relative spin rates of each body to the orbit rate
     mat phid1 = (*NA)*(*w1) - wsys;
     mat phid2 = (*NA)*(*w2) - wsys;
-    // 3 dimensional torque vectors
-    mat gamma_1_vec = phid1 - (dot(phid1,rhat))*rhat;
-    mat gamma_1_hat = -gamma_1_vec/norm(gamma_1_vec);
-    mat gamma_2_vec = phid2 - (dot(phid2,rhat))*rhat;
-    mat gamma_2_hat = -gamma_2_vec/norm(gamma_2_vec);
-    mat yhat = cross(zhat,rhat)/norm(cross(zhat,rhat));
-    // Calculate tidal torque, linearized about the synchronous spin rate as in Jacobson & Scheeres 2011
-    double g1 = 3/2*(*(inputs.love1))*pow(3/(4*M_PI*(*(inputs.rhoA))),2)*(*(inputs.G))*pow((*(inputs.TA))(0,0,0),2)*pow((*(inputs.TB))(0,0,0),2)*sin(2*(*(inputs.eps1)))/(*(inputs.refrad1))/pow(norm(*pos),6);
-    double g2 = 3/2*(*(inputs.love2))*pow(3/(4*M_PI*(*(inputs.rhoB))),2)*(*(inputs.G))*pow((*(inputs.TA))(0,0,0),2)*pow((*(inputs.TB))(0,0,0),2)*sin(2*(*(inputs.eps2)))/(*(inputs.refrad2))/pow(norm(*pos),6);
+    double pd1_sgn = dot(phid1,wsys)/abs(dot(phid1,wsys));
+    double pd2_sgn = dot(phid2,wsys)/abs(dot(phid2,wsys));
+    double g1 = pd1_sgn*3./2.*(*(inputs.love1))*pow(3./(4.*M_PI*(*(inputs.rhoA))),2.)*(*(inputs.G))*pow((*(inputs.TA))(0,0,0),2.)*pow((*(inputs.TB))(0,0,0),2)*sin(2.*(*(inputs.eps1)))/(*(inputs.refrad1))/pow(norm(*pos),6.);
+    double g2 = pd2_sgn*3./2.*(*(inputs.love2))*pow(3./(4.*M_PI*(*(inputs.rhoB))),2.)*(*(inputs.G))*pow((*(inputs.TA))(0,0,0),2.)*pow((*(inputs.TB))(0,0,0),2)*sin(2.*(*(inputs.eps2)))/(*(inputs.refrad2))/pow(norm(*pos),6.);
     double del1=g1*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoA))),.5)/(*(inputs.IA))(0,2);
     double del2=g2*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoB))),.5)/(*(inputs.IB))(0,2);
     if (norm(phid1)>abs(del1)){
-        (*(inputs.tt_1))=g1*(*NA).t()*gamma_1_hat;
+        (*(inputs.tt_1))=g1*(*NA).t()*zhat;
     }
     else{
-        (*(inputs.tt_1))=norm(phid1)*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoA))),-.5)*(*(inputs.IA))(0,2)*(*NA).t()*gamma_1_hat;
+        (*(inputs.tt_1))=pd1_sgn*norm(phid1)*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoA))),-.5)*(*(inputs.IA))(0,2)*(*NA).t()*zhat;
     }
     if (norm(phid2)>abs(del2)){
-        (*(inputs.tt_2))=g2*(*NA).t()*gamma_2_hat;
+        (*(inputs.tt_2))=g2*(*NA).t()*zhat;
     }
     else{
-        (*(inputs.tt_2))=norm(phid2)*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoB))),-.5)*(*(inputs.IB))(0,2)*(*NA).t()*gamma_2_hat;
+        (*(inputs.tt_2))=pd2_sgn*norm(phid2)*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoB))),-.5)*(*(inputs.IB))(0,2)*(*NA).t()*zhat;
     }
-    // Calculate the tidal effect on the orbit to conserve angular momentum
-    (*(inputs.tt_orbit)) = (1/(*(inputs.m)))*(cross((*(inputs.tt_1)+*(inputs.tt_2)),*pos))/pow(norm(*pos),2);
+    (*(inputs.tt_orbit)) = (1./(*(inputs.m)))*(cross((*(inputs.tt_1)+*(inputs.tt_2)),*pos))/pow(norm(*pos),2.);
+    //mat omega = cross((*pos),(*vel))/norm(*pos)/norm(*pos);
+    //mat phid1 = (*w1)-omega;
+    //mat phid2 = (*w2)-omega;
+    //if (norm(phid1)==0){
+    //    phid1<<0.<<endr<<0.<<endr<<0.<<endr;
+    //}
+    //if (norm(phid2)==0){
+    //    phid2<<(*AB)(2,0)<<endr<<(*AB)(2,1)<<endr<<(*AB)(2,2)<<endr;
+    //}
+    //mat Ax(3,1);
+    //Ax<<1.<<endr<<0.<<endr<<0.<<endr;
+    //cout<<2.*asin(norm(cross(Ax,(*pos)))/norm((*pos)))<<endl;
+    //double pd1 = phid1(2,0);
+    //double pd2 = phid2(2,0);
+    //double g1=-1.*signbit(pd1)*1.5*(*(inputs.love1))*sin(2.*asin(norm(cross(Ax,(*pos)))/norm((*pos))))*pow((*(inputs.TA))(0,0,0),2)*pow((*(inputs.TB))(0,0,0),2)*(*(inputs.G))/ *(inputs.refrad1) / pow(norm(*pos),6)*pow(3./(4*M_PI*(*(inputs.rhoA))),2);
+    //double g2=-1.*signbit(pd2)*1.5*(*(inputs.love2))*sin(2.*asin(norm(cross((*AB).row(0),-(*pos)))/norm((*pos))))*pow((*(inputs.TA))(0,0,0),2)*pow((*(inputs.TB))(0,0,0),2)*(*(inputs.G))/ *(inputs.refrad2) / pow(norm(*pos),6)*pow(3./(4*M_PI*(*(inputs.rhoB))),2);
+    //double del1=g1*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoA))),.5)/(*(inputs.IA))(0,2);
+    //double del2=g2*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoB))),.5)/(*(inputs.IB))(0,2);
+    //if (abs(pd1)>del1){
+    //    (*(inputs.tt_1))=g1*phid1/norm(phid1);
+    //}
+    //else{
+    //    (*(inputs.tt_1))=pd1*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoA))),-.5)*(*(inputs.IA))(0,2)*phid1/norm(phid1);
+    //}
+    //if (abs(pd2)>del2){
+    //    (*(inputs.tt_2))=g2*phid2/norm(phid2);
+    //}
+    //else{
+    //    (*(inputs.tt_2))=pd2*pow(6./(M_PI*(*(inputs.G))*(*(inputs.rhoB))),-.5)*(*(inputs.IB))(0,2)*phid2/norm(phid2);
+    //}
+    //(*pos).raw_print();
+    //(*vel).raw_print();
+    //omega.raw_print();
+    //phid2.raw_print();
+    //cout<<pd2<<endl;
+    //cout<<g2<<endl;
+    //(*(inputs.tt_2)).raw_print();
     return;
 }
 
@@ -2266,15 +2303,15 @@ double kepler(double *n_hyp, double t, double *e_hyp, double *tau_hyp){
         theta=2*atan(sqrt((1+(*e_hyp))/(1-(*e_hyp)))*tan(E/2));
     }
     return theta;
-} 
+}   
 
 //Reads in "ic_inputs.txt" from python shell. Input: ics - structure detailed at top of code
 void ic_read(initialization* ics){
     //set up local variable
     int order, order_a, order_b, a_shape, b_shape, Tgen, integ, flyby_toggle, helio_toggle, sg_toggle, tt_toggle;
-    double G,rhoA,rhoB,aA,bA,cA,aB,bB,cB,t0,tf,h,tol,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio, sol_rad, au_def, love1, love2, refrad1, refrad2, eps1, eps2, Msun;
+    double G,rhoA,rhoB,aA,bA,cA,aB,bB,cB,t0,tf,h,tol,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio, sol_rad, au_def, love1, love2, refrad1, refrad2, eps1, eps2, Msun, Msc, Asc, Csc;
     string TAfile,TBfile,IAfile,IBfile,tfa,vfa,tfb,vfb;
-    mat x0(1,30);
+    mat x0(1,36);
     string line;
     //standard io reading - all units expected in km kg sec-------##########
     ifstream myfile ("ic_input.txt");
@@ -2327,7 +2364,7 @@ void ic_read(initialization* ics){
         tfb=line;//secondary tet file
         getline (myfile,line);
         vfb=line;//secondary vert file
-        for(int n=0;n<30;n++){//read in states [r,v,wc,ws,Cc,C]
+        for(int n=0;n<36;n++){//read in states [r,v,wc,ws,Cc,C]
             getline (myfile,line);
             std::size_t temp=0;
             x0(0,n)=std::stod(line);
@@ -2394,6 +2431,12 @@ void ic_read(initialization* ics){
         eps2=std::stod(line);
         getline (myfile,line);
         Msun=std::stod(line);
+        getline (myfile,line);
+        Msc=std::stod(line);
+        getline (myfile,line);
+        Asc=std::stod(line);
+        getline (myfile,line);
+        Csc=std::stod(line);
         myfile.close();
     }
     else{
@@ -2456,6 +2499,9 @@ void ic_read(initialization* ics){
     (*ics).eps1=eps1;
     (*ics).eps2=eps2;
     (*ics).Msun=Msun;
+    (*ics).Msc=Msc;
+    (*ics).Asc=Asc;
+    (*ics).Csc=Csc;
     return;
 }
 
@@ -2481,3 +2527,4 @@ double factorial(double x){
     return fact;
 }
 
+  

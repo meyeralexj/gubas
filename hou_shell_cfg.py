@@ -11,26 +11,26 @@ from numpy import math as ma
 import subprocess
 import os
 import datetime
-import configparser as cfp
+import ConfigParser as cfp
 import struct 
 import csv
 from decimal import Decimal
 
-print(datetime.datetime.now())
+print datetime.datetime.now()
 # np.set_printoptions(precision=20)
 np.set_printoptions(formatter={'float': lambda x: "{0:0.20f}".format(x)})
-exec(open('./inertia_functions_met.py').read())# inertia integral and tensor calculation and manipulation
-exec(open('coefficient_funcs.py').read())# expansion coefficients
-exec(open('potential+derivs_func.py').read())# mutual potential and partials functions
-exec(open('write_icfile.py').read())# cpp input file writeout
-exec(open('benchmark_funcs.py').read())# Fahnestock format readin
-exec(open('hou_config_funcs.py').read())# Config file readin
+execfile('inertia_functions_met.py')# inertia integral and tensor calculation and manipulation
+execfile('coefficient_funcs.py')# expansion coefficients
+execfile('potential+derivs_func.py')# mutual potential and partials functions
+execfile('write_icfile.py')# cpp input file writeout
+execfile('benchmark_funcs.py')# Fahnestock format readin
+execfile('hou_config_funcs.py')# Config file readin
 
 ## variables
 # read in config file
-(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,postProcessing)=hou_config_read("hou_config.cfg")
+(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,Msc,Asc,Csc)=hou_config_read("hou_config.cfg")
 n=max(nA,nB) # set mutual potential expansion order to max inertia integral expansion order
-print("\n### Expansion Order Set To: {val} ###\n".format(val=n))
+print "\n### Expansion Order Set To: {val} ###\n".format(val=n)
 
 ## compute expansion coefficients for post processing
 a=a_calc(n)
@@ -44,14 +44,14 @@ if out_freq>0 and (out_freq<h or mod_check!=0) and integ!=3:
 
 ## announce integrator selection
 if integ ==1:
-	print("### Integrator Set to RK4 from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h))
+	print "### Integrator Set to RK4 from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h)
 elif integ ==2:
-	print("### Integrator Set to LGVI from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h))
+	print "### Integrator Set to LGVI from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h)
 elif integ ==3:
-	print("### Integrtator Set to RK 7(8) from {t0} seconds to {tf} seconds with a tolerance of {tol} ###".format(t0=t0, tf=tf, tol=tol))
-	print("+++ This is an adaptive integrator and the output will be post-processed for each step of the integrator +++")
+	print "### Integrtator Set to RK 7(8) from {t0} seconds to {tf} seconds with a tolerance of {tol} ###".format(t0=t0, tf=tf, tol=tol)
+	print "+++ This is an adaptive integrator and the output will be post-processed for each step of the integrator +++"
 elif integ ==4:
-	print("### Integrtator Set to A-B-M from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h))
+	print "### Integrtator Set to A-B-M from {t0} seconds to {tf} seconds with a fixed step of {h} seconds ###".format(t0=t0, tf=tf, h=h)
 else:
 	raise ValueError('Invalid Integrator Selection')
 
@@ -60,43 +60,43 @@ else:
 # treat is accurate enough for arbitrary order
 if nA<n and a_shape==2:
 	nA=n
-	print("### Expansion Order of Primary Shape Increased to Match Integrated Order ###")
+	print "### Expansion Order of Primary Shape Increased to Match Integrated Order ###"
 
 if nB<n and b_shape==2:
 	nB=n
-	print("### Expansion Order of Secondary Shape Increased to Match Integrated Order ###")
+	print "### Expansion Order of Secondary Shape Increased to Match Integrated Order ###"
 
 ## announce body shape selections
 if a_shape==0:
 	bA=aA
 	cA=aA
-	print("\n### Primary is a Sphere with Radius: {val} meters ###\n".format(val=aA))
+	print "\n### Primary is a Sphere with Radius: {val} meters ###\n".format(val=aA)
 elif a_shape==1:
-	print("\n### Primary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nA,a=aA,b=bA,c=cA))
+	print "\n### Primary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nA,a=aA,b=bA,c=cA)
 elif a_shape==2:
-	print("\n### Primary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nA,fa=tet_fileA, fb=vert_fileA))
+	print "\n### Primary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nA,fa=tet_fileA, fb=vert_fileA)
 else:
 	raise ValueError('Bad Shape Selection for Primary')
 
 if b_shape==0:
 	bB=aB
 	cB=aB
-	print("\n### Secondary is a Sphere with Radius: {val} meters ###\n".format(val=aB))
+	print "\n### Secondary is a Sphere with Radius: {val} meters ###\n".format(val=aB)
 elif b_shape==1:
-	print("\n### Secondary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nB,a=aB,b=bB,c=cB))
+	print "\n### Secondary is an Order {val} Ellipsoid with Semi-Axes: a = {a} meters, b = {b} meters, c = {c} meters ###\n".format(val=nB,a=aB,b=bB,c=cB)
 elif b_shape==2:
-	print("\n### Secondary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nB,fa=tet_fileB, fb=vert_fileB))
+	print "\n### Secondary is a Full Shape Model Computed for Order {val} using Files: {fa} and {fb} ###\n".format(val=nB,fa=tet_fileB, fb=vert_fileB)
 else:
 	raise ValueError('Bad Shape Selection for Secondary')
 
 ## write cpp input file
 write_icfile(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,"TDP_"+str(n)+".mat","TDS_"+str(n)+".mat","IDP.mat","IDS.mat",\
-	tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun)
+	tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,Msc,Asc,Csc)
 
 ## call cpp exe
 subprocess.call(["./hou_cpp_final"])
 
-print(datetime.datetime.now())
+print datetime.datetime.now()
 
 ## convert cpp inertia integral format to python format - 3D matrices use difference index order so must fix this for python
 TAc=np.genfromtxt ("TDP_"+str(n)+".csv", delimiter=",")
@@ -130,49 +130,38 @@ Izz_s=IB[0,2]
 mu=G*(Mc+Ms)
 
 ## post processing
-row_len=30 # xout.bin has row entries of length 30 (30 integrated state variables)
+row_len=36 # xout.bin has row entries of length 30 (30 integrated state variables)
 print('Post Processing...')
-if not postProcessing:
-	print("Just kidding, we are not post processing. Outputing output_t/t_out.bin and output_x/x_out.bin only.")
-	print(datetime.datetime.now())
-	quit()
-
-
+quit()
 if os.path.isfile('LagrangianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
 	os.remove('LagrangianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
-if os.path.isfile('FHamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
-	os.remove('FHamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
-if os.path.isfile('HamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
-	os.remove('HamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
-if os.path.isfile('Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
-	os.remove('Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
-if os.path.isfile('Conservation_Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
-	os.remove('Conservation_Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
-if flyby_toggle==1:
-	if os.path.isfile('HyperbolicState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
-		os.remove('HyperbolicState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
-if helio_toggle==1:
-	if os.path.isfile('SolarState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
-		os.remove('SolarState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
+#if os.path.isfile('FHamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
+#	os.remove('FHamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
+#if os.path.isfile('HamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
+#	os.remove('HamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
+#if os.path.isfile('Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
+#	os.remove('Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
+#if os.path.isfile('Conservation_Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
+#	os.remove('Conservation_Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
+#if os.path.isfile('HyperbolicState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
+#	os.remove('HyperbolicState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
+if os.path.isfile('SolarState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv'):
+	os.remove('SolarState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv')
 L_f=open('LagrangianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
-FH_f=open('FHamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
-H_f=open('HamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
-EA_f=open('Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
-CEA_f=open('Conservation_Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
-if flyby_toggle==1:
-	HS_f=open('HyperbolicState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv','a')
-if helio_toggle==1:
-	Solar_f=open('SolarState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv','a')
+#FH_f=open('FHamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
+#H_f=open('HamiltonianStateOut_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
+#EA_f=open('Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
+#CEA_f=open('Conservation_Energy+AngMom_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv', 'a')
+#HS_f=open('HyperbolicState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv','a')
+Solar_f=open('SolarState_'+str(tf)+'_'+str(out_freq)+'_'+str(h)+'_'+str(n)+'_'+str(integ)+'_'+case+'.csv','a')
 
 L_w=csv.writer(L_f)
-FH_w=csv.writer(FH_f)
-H_w=csv.writer(H_f)
-EA_w=csv.writer(EA_f)
-CEA_w=csv.writer(CEA_f)
-if flyby_toggle==1:
-	HS_w=csv.writer(HS_f)
-if helio_toggle==1:
-	Solar_w=csv.writer(Solar_f)
+#FH_w=csv.writer(FH_f)
+#H_w=csv.writer(H_f)
+#EA_w=csv.writer(EA_f)
+#CEA_w=csv.writer(CEA_f)
+#HS_w=csv.writer(HS_f)
+Solar_w=csv.writer(Solar_f)
 
 if out_freq==-1 or integ==3: # if a output time file or rk 7(8) are used enter this post processing method
 	if integ==3.:
@@ -187,8 +176,8 @@ if out_freq==-1 or integ==3: # if a output time file or rk 7(8) are used enter t
 				# eof
 				break
 			t=struct.unpack('d',t)
-			if t in times:
-					times[times.index(t)]=count
+                        if t in times:
+				times[times.index(t)]=count
 			elif integ==3:
 				times.append(count)
 			count=count+1
@@ -198,24 +187,24 @@ if out_freq==-1 or integ==3: # if a output time file or rk 7(8) are used enter t
 	# count2=0
 	dsize=len(times)
 	x_file=open('output_x/x_out.bin',"rb")
-	t_file=open('output_t/t_out.bin',"rb")
-	kt=np.zeros([1,1])
-	kr1=np.zeros([1,1])
-	kr2=np.zeros([1,1])
-	U=np.zeros([1,1])
-	E=np.zeros([1,1])
-	H=np.zeros([1,3])
-	rpos=np.zeros([1,3])
-	lvel=np.zeros([1,3])
-	lwc=np.zeros([1,3])
-	lws=np.zeros([1,3])
-	rmom=np.zeros([1,3])
-	cLa=np.zeros([1,3])
-	cLb=np.zeros([1,3])
-	C_store=np.zeros([1,9])
-	Cc_store=np.zeros([1,9])
-	fCc_store=np.zeros([1,9])
-	tsett=np.zeros([1,1])
+        t_file=open('output_t/t_out.bin',"rb")
+        kt=np.zeros([1,1])
+        kr1=np.zeros([1,1])
+        kr2=np.zeros([1,1])
+        U=np.zeros([1,1])
+        E=np.zeros([1,1])
+        H=np.zeros([1,3])
+        rpos=np.zeros([1,3])
+        lvel=np.zeros([1,3])
+        lwc=np.zeros([1,3])
+        lws=np.zeros([1,3])
+        rmom=np.zeros([1,3])
+        cLa=np.zeros([1,3])
+        cLb=np.zeros([1,3])
+        C_store=np.zeros([1,9])
+        Cc_store=np.zeros([1,9])
+        fCc_store=np.zeros([1,9])
+        tsett=np.zeros([1,1])
 	for f in range(count):# count is the number of time steps found in binary during "with open" loop above
 		if f in times:# loop through stored lists of output times
 			tseek=t_file.seek(f*8)#jump in bits for time binary
@@ -259,13 +248,13 @@ if out_freq==-1 or integ==3: # if a output time file or rk 7(8) are used enter t
 			dH=(la.norm(H0)-la.norm(H))/la.norm(H0)
 
 			lstateout=np.c_[tsett,rpos,lvel,lwc,lws,C_store,Cc_store,U*(1000.**2)]# lagrangian states set
-			fhstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,fCc_store,U*(1000.**2)]# fahnestock formatted hamiltonian states set
-			hstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,Cc_store,U*(1000.**2)]# hamiltonian states set
+			#fhstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,fCc_store,U*(1000.**2)]# fahnestock formatted hamiltonian states set
+			#hstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,Cc_store,U*(1000.**2)]# hamiltonian states set
 			L_w.writerow(lstateout[0])
-			FH_w.writerow(fhstateout[0])
-			H_w.writerow(hstateout[0])
-			EA_w.writerow(np.c_[E,H][0])
-			CEA_w.writerow(np.c_[dE,dH][0])
+			#FH_w.writerow(fhstateout[0])
+			#H_w.writerow(hstateout[0])
+			#EA_w.writerow(np.c_[E,H][0])
+			#CEA_w.writerow(np.c_[dE,dH][0])
 			# count2=count2+1
 else:# if every time step or fixed output frequency do this post processing
 	if out_freq==0.:
@@ -275,10 +264,8 @@ else:# if every time step or fixed output frequency do this post processing
 	dsize=len(times)#number of storage entries needed
 	x_file=open('output_x/x_out.bin',"rb")
 	t_file=open('output_t/t_out.bin',"rb")
-	if flyby_toggle==1:
-		h_file=open('output_h/h_out.bin',"rb")
-	if helio_toggle==1:
-		sun_file=open('output_sun/sun_out.bin',"rb")
+	#h_file=open('output_h/h_out.bin',"rb")
+	sun_file=open('output_sun/sun_out.bin',"rb")
 	##setup storage arrays
 	kt=np.zeros([1,1])
 	kr1=np.zeros([1,1])
@@ -298,8 +285,10 @@ else:# if every time step or fixed output frequency do this post processing
 	C_store=np.zeros([1,9])
 	Cc_store=np.zeros([1,9])
 	fCc_store=np.zeros([1,9])
-	rhyp=np.zeros([1,3])
-	vhyp=np.zeros([1,3])
+	scpos=np.zeros([1,3])
+	scvel=np.zeros([1,3])
+	#rhyp=np.zeros([1,3])
+	#vhyp=np.zeros([1,3])
 	rhelio=np.zeros([1,3])
 	vhelio=np.zeros([1,3])
 	tsett=np.zeros([1,1])
@@ -309,12 +298,10 @@ else:# if every time step or fixed output frequency do this post processing
 		useek=x_file.seek(row_len*seek_var*f*8)# jump in bits for states binary
 		u=struct.unpack(str(row_len)+'d',x_file.read(8*row_len))
 		tsett[0]=t#tspan[t]
-		if flyby_toggle==1:
-			hseek=h_file.seek(6*seek_var*f*8)
-			hp=struct.unpack(str(6)+'d',h_file.read(8*6))
-		if helio_toggle==1:
-			sunseek=sun_file.seek(6*seek_var*f*8)
-			solar=struct.unpack(str(6)+'d',sun_file.read(8*6))
+		#hseek=h_file.seek(6*seek_var*f*8)
+		#hp=struct.unpack(str(6)+'d',h_file.read(8*6))
+		solarseek=sun_file.seek(6*seek_var*f*8)
+		solar=struct.unpack(str(6)+'d',sun_file.read(8*6))
 		#cc=np.reshape(u[12:21],[3,3]).T#np.reshape(u[12:21],[3,3])
 		cc=np.reshape(u[12:21],[3,3])# rotation matrix from A to N
 		c=np.reshape(u[21:30],[3,3])# rotation matrix from B to A
@@ -341,6 +328,8 @@ else:# if every time step or fixed output frequency do this post processing
 		C_store[0]=np.reshape(c,[1,9])
 		Cc_store[0]=np.reshape(cc,[1,9])
 		fCc_store[0]=np.reshape(cc.T,[1,9])
+		scpos[0]=np.array([u[30:33]])*1000.# relative position in A
+		scvel[0]=np.array([u[33:36]])*1000.# relative vel in A
 		e=np.dot(cc.T,r/la.norm(r)).T#rel pos unit vector
 		R=la.norm(r)# rel pos magnitude
 		TBp=inertia_rot(c,n,TB)# rotated secondary inertia integrals
@@ -351,52 +340,41 @@ else:# if every time step or fixed output frequency do this post processing
 			H0=np.copy(H[0])
 		dE=(E0-E)/E0
 		dH=(la.norm(H0)-la.norm(H))/la.norm(H0)
-		if flyby_toggle==1:
-			rhyp[0]=np.array([hp[0:3]])
-			vhyp[0]=np.array([hp[3:6]])
-		if helio_toggle==1:
-			rhelio[0]=np.array([solar[0:3]])
-			vhelio[0]=np.array([solar[3:6]])
+		#rhyp[0]=np.array([hp[0:3]])
+		#vhyp[0]=np.array([hp[3:6]])
+		rhelio[0]=np.array([solar[0:3]])
+		vhelio[0]=np.array([solar[3:6]])
 
-		lstateout=np.c_[tsett,rpos,lvel,lwc,lws,C_store,Cc_store,U*(1000.**2)]# lagrangian states set
-		fhstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,fCc_store,U*(1000.**2)]# fahnestock formatted hamiltonian states set
-		hstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,Cc_store,U*(1000.**2)]# hamiltonian states set
-		if flyby_toggle==1:
-			hyperbolicout=np.c_[rhyp,vhyp]# 3rd body state set
-		if helio_toggle==1:
-			solarout=np.c_[rhelio,vhelio]
+		lstateout=np.c_[tsett,rpos,lvel,lwc,lws,C_store,Cc_store,U*(1000.**2),scpos,scvel]# lagrangian states set
+		#fhstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,fCc_store,U*(1000.**2)]# fahnestock formatted hamiltonian states set
+		#hstateout=np.c_[tsett,rpos,rmom,cLa,cLb,C_store,Cc_store,U*(1000.**2)]# hamiltonian states set
+		#hyperbolicout=np.c_[rhyp,vhyp]
+		solarout=np.c_[rhelio,vhelio]
 		L_w.writerow(lstateout[0])
-		FH_w.writerow(fhstateout[0])
-		H_w.writerow(hstateout[0])
-		EA_w.writerow(np.c_[E,H][0])
-		CEA_w.writerow(np.c_[dE,dH][0])
-		if flyby_toggle==1:
-			HS_w.writerow(hyperbolicout[0])
-		if helio_toggle==1:
-			Solar_w.writerow(solarout[0])
+		#FH_w.writerow(fhstateout[0])
+		#H_w.writerow(hstateout[0])
+		#EA_w.writerow(np.c_[E,H][0])
+		#CEA_w.writerow(np.c_[dE,dH][0])
+		#HS_w.writerow(hyperbolicout[0])
+		Solar_w.writerow(solarout[0])
 
 x_file.close()
 t_file.close()
-if flyby_toggle==1:
-	h_file.close()
+#h_file.close()
 L_f.close()
-FH_f.close()
-H_f.close()
-EA_f.close()
-CEA_f.close()
-if flyby_toggle==1:
-	HS_f.close()
-if helio_toggle==1:
-	Solar_f.close()
+#FH_f.close()
+#H_f.close()
+#EA_f.close()
+#CEA_f.close()
+#HS_f.close()
+Solar_f.close()
 
 
 
 t_file.close()
 x_file.close()
-if flyby_toggle==1:
-	h_file.close()
-if helio_toggle==1:
-	sun_file.close()
+#h_file.close()
+sun_file.close()
 
 # if out_freq==-1 or integ==3: # if a output time file or rk 7(8) are used enter this post processing method
 # 	if integ==3.:
@@ -559,4 +537,4 @@ if helio_toggle==1:
 # t_file.close()
 # x_file.close()
 
-print(datetime.datetime.now())
+print datetime.datetime.now()

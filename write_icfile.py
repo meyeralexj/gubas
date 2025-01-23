@@ -11,7 +11,7 @@ from numpy import math as ma
 import subprocess
 
 # standard io simply puts variables in a line and moves to next line
-def write_icfile(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,TAfile,TBfile,IAfile,IBfile,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,flybl_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun):
+def write_icfile(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,TAfile,TBfile,IAfile,IBfile,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,Msc,Asc,Csc):
 	file=open("ic_input.txt","w")
 	file.write(repr(G))# gravity parameter - should be in units of km and kg
 	file.write('\n')
@@ -61,7 +61,7 @@ def write_icfile(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,TAf
 	file.write('\n')
 	file.write(vert_fileB)# secondary ver file
 	file.write('\n')
-	for i in range(30):# step through states - units of km, s and rad where applicable - [r, v, wc, ws, Cc, C]
+	for i in range(36):# step through states - units of km, s and rad where applicable - [r, v, wc, ws, Cc, C]
 		file.write(repr(x0[i]))
 		file.write('\n')
 	file.write(repr(Tgen))# inertia integral generation flag
@@ -125,5 +125,11 @@ def write_icfile(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,TAf
 	file.write(repr(eps2))
 	file.write('\n')
 	file.write(repr(Msun))
+	file.write('\n')
+	file.write(repr(Msc))
+	file.write('\n')
+	file.write(repr(Asc))
+	file.write('\n')
+	file.write(repr(Csc))
 	file.write('\n')
 	return

@@ -36,16 +36,16 @@ def hou_config_read(filename):
     vert_fileB=CFG.get("Body Model Definitions","Secondary Vertex File")
     
     # get output settings
-    postProcessing=CFG.getint("Output Settings", "Post Processing") #added by hagrusa, option to only output binaries
     out_freq=CFG.getfloat("Output Settings", "Fixed Output Frequency")
     out_time_name=CFG.get("Output Settings","Specified Time List Filename")
     case=CFG.get("Output Settings","Case Name")
 
+
     # get additional forces settings
     flyby_toggle = CFG.getint("Additional Forces and Perturbations","Flyby")
+    helio_toggle = CFG.getint("Additional Forces and Perturbations","Heliocentric Orbit")
     sg_toggle = CFG.getint("Additional Forces and Perturbations","Solar Gravity")
     tt_toggle = CFG.getint("Additional Forces and Perturbations","Tidal Torque")
-    helio_toggle = CFG.getint("Additional Forces and Perturbations","Heliocentric Orbit")
     Mplanet = CFG.getfloat("Additional Forces and Perturbations","Planetary Mass")
     a_hyp = CFG.getfloat("Additional Forces and Perturbations","Semimajor Axis")
     e_hyp = CFG.getfloat("Additional Forces and Perturbations","Eccentricity")
@@ -60,15 +60,20 @@ def hou_config_read(filename):
     RAAN_helio = CFG.getfloat("Additional Forces and Perturbations","Heliocentric RAAN")
     om_helio = CFG.getfloat("Additional Forces and Perturbations","Heliocentric Argument of Periapsis")
     tau_helio = CFG.getfloat("Additional Forces and Perturbations","Time of periapsis passage")
+
     sol_rad = CFG.getfloat("Additional Forces and Perturbations","Solar Orbit Radius")
     au_def = CFG.getfloat("Additional Forces and Perturbations","AU Definition")/1000.
     love1 = CFG.getfloat("Additional Forces and Perturbations","Primary Love Number")
     love2 = CFG.getfloat("Additional Forces and Perturbations","Secondary Love Number")
-    refrad1 = CFG.getfloat("Additional Forces and Perturbations","Primary Reference Radius")
-    refrad2 = CFG.getfloat("Additional Forces and Perturbations","Secondary Reference Radius")
+    refrad1 = CFG.getfloat("Additional Forces and Perturbations","Primary Reference Radius")/1000.
+    refrad2 = CFG.getfloat("Additional Forces and Perturbations","Secondary Reference Radius")/1000.
     eps1 = CFG.getfloat("Additional Forces and Perturbations","Primary Tidal Lag Angle")
     eps2 = CFG.getfloat("Additional Forces and Perturbations","Secondary Tidal Lag Angle")
-    Msun = CFG.getfloat("Additional Forces and Perturbations","Sun Mass")
+    Msun = CFG.getfloat("Additional Forces and Perturbations","Solar Mass")
+
+    Msc = CFG.getfloat("Spacecraft Initial Conditions","SC Mass")
+    Asc = CFG.getfloat("Spacecraft Initial Conditions","SC Area")
+    Csc = CFG.getfloat("Spacecraft Initial Conditions","SC Reflectivity")
     
     # check initial conditions type with fahnestock flag
     if fahnestock_flag==1:
@@ -84,7 +89,7 @@ def hou_config_read(filename):
         rhoB=CFG.getfloat("Body Model Definitions","Secondary Density")*1.e12
         
         # get initial conditions - convert to km kg s units
-        x0=np.zeros([30])
+        x0=np.zeros([36])
         x0[0]=CFG.getfloat("Initial Conditions","Relative Position X")/1000.
         x0[1]=CFG.getfloat("Initial Conditions","Relative Position Y")/1000.
         x0[2]=CFG.getfloat("Initial Conditions","Relative Position Z")/1000.
@@ -108,8 +113,6 @@ def hou_config_read(filename):
             x0[27]=CFG.getfloat("Initial Conditions","B into A (3,1)")
             x0[28]=CFG.getfloat("Initial Conditions","B into A (3,2)")
             x0[29]=CFG.getfloat("Initial Conditions","B into A (3,3)")
-            C=np.reshape(x0[21:30],[3,3])
-
         else:# if user defines euler angles use this rotation matrix definition - MAKE SURE INPUT EULER ANGLES MATCH THEIR DEFINITIONS
             th1=CFG.getfloat("Initial Conditions","B into A Euler 1 X")
             th2=CFG.getfloat("Initial Conditions","B into A Euler 2 Y")
@@ -118,7 +121,6 @@ def hou_config_read(filename):
                 [-np.cos(th2)*np.sin(th3),-np.sin(th1)*np.sin(th2)*np.sin(th3)+np.cos(th1)*np.cos(th3),np.cos(th1)*np.sin(th2)*np.sin(th3)+np.sin(th1)*np.cos(th3)],\
                 [np.sin(th2),-np.sin(th1)*np.cos(th2),np.cos(th1)*np.cos(th2)]]).T          
             x0[21:30]=np.reshape(C,[1,9])
-            
         if Cc_flag==0:
             x0[12]=CFG.getfloat("Initial Conditions","A into N (1,1)")
             x0[13]=CFG.getfloat("Initial Conditions","A into N (1,2)")
@@ -137,6 +139,13 @@ def hou_config_read(filename):
                 [-np.cos(th2)*np.sin(th3),-np.sin(th1)*np.sin(th2)*np.sin(th3)+np.cos(th1)*np.cos(th3),np.cos(th1)*np.sin(th2)*np.sin(th3)+np.sin(th1)*np.cos(th3)],\
                 [np.sin(th2),-np.sin(th1)*np.cos(th2),np.cos(th1)*np.cos(th2)]]).T  
             x0[12:21]=np.reshape(Cc,[1,9])
+
+        # get spacecraft initial conditions
+        x0[30] = CFG.getfloat("Spacecraft Initial Conditions","SC Position X")/1000.
+        x0[31] = CFG.getfloat("Spacecraft Initial Conditions","SC Position Y")/1000.
+        x0[32] = CFG.getfloat("Spacecraft Initial Conditions","SC Position Z")/1000.
+        x0[33] = CFG.getfloat("Spacecraft Initial Conditions","SC Velocity X")/1000.
+        x0[34] = CFG.getfloat("Spacecraft Initial Conditions","SC Velocity Y")/1000.
+        x0[35] = CFG.getfloat("Spacecraft Initial Conditions","SC Velocity Z")/1000.
     
-        x0[9:12]=np.dot(C,np.array([x0[9:12]]).T).T[0]
-    return(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,postProcessing)
+    return(G,n,nA,nB,aA,bA,cA,aB,bB,cB,a_shape,b_shape,rhoA,rhoB,t0,tf,tet_fileA,vert_fileA,tet_fileB,vert_fileB,x0,Tgen,integ,h,tol,out_freq,out_time_name,case,flyby_toggle,helio_toggle,sg_toggle,tt_toggle,Mplanet,a_hyp,e_hyp,i_hyp,RAAN_hyp,om_hyp,tau_hyp,Msolar,a_helio,e_helio,i_helio,RAAN_helio,om_helio,tau_helio,sol_rad,au_def,love1,love2,refrad1,refrad2,eps1,eps2,Msun,Msc,Asc,Csc)
